@@ -1,0 +1,97 @@
+---
+import Layout from '../layouts/Layout.astro';
+import faqData from '../data/faq.json';
+
+// We'll transform the JSON object into a simpler array to loop through easily
+const faqs = [
+  { q: faqData.faq_1, a: faqData.faq_1_ans },
+  { q: faqData.faq_2, a: faqData.faq_2_ans },
+  { q: faqData.faq_3, a: faqData.faq_3_ans },
+  { q: faqData.faq_4, a: faqData.faq_4_ans },
+  { q: faqData.faq_5, a: faqData.faq_5_ans },
+];
+---
+
+<Layout title="FAQ | Ali1_Visuals">
+  <main class="min-h-screen bg-obsidian">
+    <div class="h-32"></div>
+
+    <section class="mx-auto max-w-4xl px-6 py-10">
+      <header class="mb-20 text-center">
+        <h1 class="font-display text-xs font-bold uppercase tracking-[0.5em] text-brand-gold mb-4">
+          Common Inquiries
+        </h1>
+        <h2 class="font-display text-5xl font-black uppercase tracking-tighter text-white">
+          Frequently Asked <span class="text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-500">Questions</span>
+        </h2>
+      </header>
+
+      <div class="space-y-4">
+        {faqs.map((faq, index) => (
+          <div class="border border-white/5 bg-card-dark transition-all duration-500 has-[:checked]:border-brand-gold/20 has-[:checked]:shadow-[0_0_20px_rgba(197,160,89,0.05)]">
+            {/* 1. The Hidden Checkbox */}
+            <input type="checkbox" id={`faq-${index}`} class="peer hidden" />
+            
+            {/* 2. The Label (Acts as the Summary) */}
+            <label for={`faq-${index}`} class="flex cursor-pointer items-center justify-between p-6 outline-none">
+              <span class="font-display text-sm font-bold uppercase tracking-widest text-white peer-checked:text-brand-gold transition-colors">
+                {faq.q}
+              </span>
+              
+              {/* The Icon */}
+              <span class="text-brand-gold transition-all duration-500 peer-checked:rotate-180 peer-checked:scale-110">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="drop-shadow-[0_0_5px_rgba(197,160,89,0.3)]">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="14.31" y1="8" x2="20.05" y2="17.94"></line>
+                  <line x1="9.69" y1="8" x2="21.17" y2="8"></line>
+                  <line x1="7.38" y1="12" x2="13.12" y2="2.06"></line>
+                  <line x1="9.69" y1="16" x2="3.95" y2="6.06"></line>
+                  <line x1="14.31" y1="16" x2="2.83" y2="16"></line>
+                  <line x1="16.62" y1="12" x2="10.88" y2="21.94"></line>
+                </svg>
+              </span>
+            </label>
+
+            {/* 3. The Content (Uses the same Grid Trick) */}
+            <div class="grid grid-rows-[0fr] transition-[grid-template-rows] duration-500 peer-checked:grid-rows-[1fr]">
+              <div class="overflow-hidden">
+                <div class="px-6 pb-6 text-gray-400 leading-relaxed text-sm border-t border-white/5 pt-4 opacity-0 transition-opacity duration-500 peer-checked:opacity-100">
+                  <p set:html={faq.a} />
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div class="mt-15 border-t border-white/5 pt-5 text-center">
+        <p class="text-gray-500 text-xs uppercase tracking-widest mb-6">Still have questions?</p>
+        <a href="/contact" class="inline-block bg-brand-gold text-black px-10 py-4 text-[10px] font-black uppercase tracking-[0.3em] transition-all hover:bg-brand-light-gold hover:text-[11px]">
+          Contact Asad Directly
+        </a>
+      </div>
+    </section>
+  </main>
+</Layout>
+
+<style>
+  /* 1. Target the text container inside the grid when the checkbox is checked */
+  input:checked ~ div > div > div {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+    transition: opacity 0.5s ease, transform 0.5s ease;
+    transition-delay: 0.1s;
+  }
+
+  /* 2. Initial state for the text (hidden) */
+  .grid > div > div {
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+
+  /* 3. Prevent blue highlight on mobile tap for the label */
+  label {
+    -webkit-tap-highlight-color: transparent;
+  }
+</style>

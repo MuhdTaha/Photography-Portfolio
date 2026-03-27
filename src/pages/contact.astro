@@ -1,0 +1,91 @@
+---
+import Layout from '../layouts/Layout.astro';
+import siteData from '../data/site.json';
+---
+
+<Layout title="Contact | Ali1_Visuals">
+  <main class="min-h-screen bg-obsidian">
+    <div class="h-10"></div>
+
+    <section class="mx-auto max-w-7xl px-6 py-20">
+      <div class="grid gap-16 lg:grid-cols-2">
+        
+        <div class="flex flex-col justify-center">
+          <h1 class="font-display text-5xl font-black uppercase tracking-tighter md:text-7xl">
+            Get in <span class="text-brand-gold">Touch</span>
+          </h1>
+          
+          <div class="mt-8 space-y-6">
+            <p class="max-w-md text-lg leading-relaxed text-gray-400">
+              {siteData.contact_text}
+            </p>
+            
+            <div class="space-y-4">
+              <div class="group flex items-center gap-4">
+                <div class="flex h-10 w-10 items-center justify-center rounded-full border border-brand-gold/20 bg-brand-gold/5 text-brand-gold">
+                  <span class="text-xs">@</span>
+                </div>
+                <div>
+                  <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Instagram</p>
+                  <a href={siteData.instagram} target="_blank" class="text-white hover:text-brand-gold transition-colors">@Ali1_Visuals</a>
+                </div>
+              </div>
+
+              <div class="group flex items-center gap-4">
+                <div class="flex h-10 w-10 items-center justify-center rounded-full border border-brand-gold/20 bg-brand-gold/5 text-brand-gold">
+                  <span class="text-xs">EN</span>
+                </div>
+                <div>
+                  <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Email</p>
+                  <a href={`mailto:${siteData.email}`} class="text-white hover:text-brand-gold transition-colors">${siteData.email}</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="relative">
+          <div class="absolute -inset-1 rounded-lg bg-gradient-to-r from-brand-gold/20 to-transparent blur-xl opacity-50"></div>
+          
+          <form 
+            action="https://formspree.io/f/your-id" 
+            method="POST"
+            class="relative space-y-4 rounded-xl border border-white/5 bg-card-dark p-8 md:p-10 shadow-2xl"
+          >
+            <div class="grid gap-4 md:grid-cols-2">
+              <div class="space-y-2">
+                <label class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Name</label>
+                <input type="text" name="name" required class="w-full rounded-sm border border-white/10 bg-obsidian p-4 text-white outline-none focus:border-brand-gold transition-all" />
+              </div>
+              <div class="space-y-2">
+                <label class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Email</label>
+                <input type="email" name="email" required class="w-full rounded-sm border border-white/10 bg-obsidian p-4 text-white outline-none focus:border-brand-gold transition-all" />
+              </div>
+            </div>
+            
+            <div class="space-y-2">
+              <label class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Subject (Category)</label>
+              <select name="category" class="w-full rounded-sm border border-white/10 bg-obsidian p-4 text-white outline-none focus:border-brand-gold transition-all appearance-none">
+                <option>Automotive</option>
+                <option>Sports</option>
+                <option>Portraits</option>
+                <option>Nature</option>
+                <option>Other</option>
+              </select>
+            </div>
+
+            <div class="space-y-2">
+              <label class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Message</label>
+              <textarea name="message" rows="5" required class="w-full rounded-sm border border-white/10 bg-obsidian p-4 text-white outline-none focus:border-brand-gold transition-all resize-none"></textarea>
+            </div>
+
+            <button type="submit" class="mt-4 w-full rounded-sm bg-brand-gold py-5 text-xs font-black uppercase tracking-[0.2em] text-black transition-all hover:bg-brand-light-gold hover:scale-[1.01] active:scale-95">
+              Send Message
+            </button>
+          </form>
+        </div>
+
+      </div>
+    </section>
+  </main>
+</Layout>

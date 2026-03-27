@@ -1,0 +1,23 @@
+/* src/styles/global.css */
+@import "tailwindcss";
+
+@theme {
+  --color-brand-gold: #C5A059;
+  --color-brand-light-gold: #D1B37C;
+  --color-obsidian: #050505;
+  --color-card-dark: #0A0A0A;
+  
+  --font-display: "Montserrat", sans-serif;
+  --font-body: "Inter", sans-serif;
+}
+
+/* Custom Cinematic Grain Overlay */
+@utility bg-grain {
+  background-image: url("https://www.transparenttextures.com/patterns/carbon-fibre.png");
+  opacity: 0.03;
+}
+
+::selection { background: var(--color-brand-gold); color: black; }
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--color-obsidian); }
+::-webkit-scrollbar-thumb { background: var(--color-brand-gold); }

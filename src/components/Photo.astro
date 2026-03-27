@@ -1,0 +1,26 @@
+---
+// src/components/Photo.astro
+
+const { publicId, alt, title } = Astro.props;
+const gridUrl = `https://res.cloudinary.com/${import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/f_auto,q_auto,w_800/${publicId}`;
+const fullUrl = `https://res.cloudinary.com/${import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/f_auto,q_auto,w_2000/${publicId}`;
+---
+
+<div 
+  class="photo-trigger group relative overflow-hidden rounded-md bg-card-dark border border-white/5 mb-4 break-inside-avoid cursor-pointer"
+  data-full-url={fullUrl}
+  data-title={title}
+>
+  <img 
+    src={gridUrl} 
+    alt={alt} 
+    loading="lazy" 
+    class="w-full h-auto transition-transform duration-700 group-hover:scale-105"
+  />
+  
+  <div class="absolute inset-0 flex items-end bg-linear-to-t from-black/90 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 p-6">
+    <p class="text-white font-display text-[10px] uppercase tracking-widest leading-none">
+      {title}
+    </p>
+  </div>
+</div>

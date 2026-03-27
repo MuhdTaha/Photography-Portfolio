@@ -1,17 +1,49 @@
 ---
+import Layout from '../layouts/Layout.astro';
+import Hero from '../components/Hero.astro';
+import Photo from '../components/Photo.astro';
+import { client } from '../lib/sanity';
+import { ALL_PHOTOS_QUERY } from '../utils/queries';
+import siteData from '../data/site.json';
 
+const photos = await client.fetch(ALL_PHOTOS_QUERY);
+const categories = ['Automotive', 'Sports', 'Portraits', 'Nature'];
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<Layout title="Ali1_Visuals | Discover Stunning Visuals">
+  <main class="bg-obsidian">
+    <Hero />
+
+    <section class="py-24 px-4 text-center max-w-3xl mx-auto">
+      <h1 class="text-brand-gold font-display text-[10px] font-bold tracking-[0.5em] uppercase mb-6">The Vision</h1>
+      <p class="text-xl md:text-2xl font-light leading-relaxed text-gray-300 italic">
+        "{siteData.home_text}"
+      </p>
+    </section>
+
+    {categories.map((cat) => {
+      // Filter photos for this specific category
+      const categoryPhotos = photos.filter(p => p.category?.toLowerCase() === cat.toLowerCase()).slice(0, 4);
+      
+      return (
+        <section class="mb-32">
+          <div class="max-w-7xl mx-auto px-6 flex items-center gap-4 mb-10">
+            <h2 class="font-display text-3xl font-black uppercase tracking-tighter italic">{cat}</h2>
+            <div class="h-px flex-1 bg-linear-to-r from-brand-gold/40 to-transparent"></div>
+          </div>
+          
+          <div class="max-w-7xl mx-auto px-4 columns-1 md:columns-3 gap-4 space-y-4">
+            {categoryPhotos.map((photo) => (
+              <div class="break-inside-avoid"> <Photo 
+                  publicId={photo.publicId} 
+                  title={photo.title} 
+                  category={photo.category} 
+                />
+              </div>
+            ))}
+          </div>
+        </section>
+      )
+    })}
+  </main>
+</Layout>

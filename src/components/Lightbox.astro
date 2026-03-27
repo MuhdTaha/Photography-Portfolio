@@ -1,0 +1,169 @@
+---
+// src/components/Lightbox.astro
+---
+<div id="lightbox" class="fixed inset-0 z-[100] hidden bg-black/95 backdrop-blur-sm items-center justify-center cursor-default select-none transition-all duration-300">
+  
+  <div id="lightbox-loader" class="absolute inset-0 flex items-center justify-center hidden">
+    <div class="h-10 w-10 animate-spin rounded-full border-2 border-brand-gold/20 border-t-brand-gold"></div>
+  </div>
+
+  <button id="close-lightbox" class="absolute top-6 right-6 p-4 text-white/50 hover:text-brand-gold transition-colors z-[110] cursor-pointer">
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+  </button>
+
+  <button id="prev-photo" class="absolute left-0 top-0 bottom-0 w-[15%] flex items-center justify-center text-white/20 hover:text-brand-gold hover:bg-gradient-to-r hover:from-black/40 to-transparent transition-all z-[105] cursor-pointer group">
+    <svg class="group-hover:-translate-x-1 transition-transform" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+  </button>
+  
+  <button id="next-photo" class="absolute right-0 top-0 bottom-0 w-[15%] flex items-center justify-center text-white/20 hover:text-brand-gold hover:bg-gradient-to-l hover:from-black/40 to-transparent transition-all z-[105] cursor-pointer group">
+    <svg class="group-hover:translate-x-1 transition-transform" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+  </button>
+
+  <div class="relative w-full h-full max-h-[100dvh] max-w-[100vw] flex flex-col items-center justify-center p-4 md:p-16">
+    <div class="relative flex items-center justify-center w-full h-full pointer-events-none">
+      <img 
+        id="lightbox-img" 
+        src="" 
+        alt="" 
+        class="max-w-full max-h-full w-auto h-auto object-contain shadow-2xl transition-opacity duration-300 pointer-events-auto select-none z-[110]"
+      />
+    </div>
+    <p id="lightbox-caption" class="pointer-events-none absolute bottom-6 left-1/2 w-full max-w-3xl -translate-x-1/2 px-4 text-center font-display text-[10px] uppercase tracking-[0.4em] text-white/50"></p>
+  </div>
+</div>
+
+<script>
+  const lightbox = document.getElementById('lightbox');
+  const loader = document.getElementById('lightbox-loader');
+  const lightboxImg = document.getElementById('lightbox-img') as HTMLImageElement;
+  const lightboxCaption = document.getElementById('lightbox-caption');
+  const closeBtn = document.getElementById('close-lightbox');
+  const prevBtn = document.getElementById('prev-photo');
+  const nextBtn = document.getElementById('next-photo');
+
+  let currentImages: string[] = [];
+  let currentCaptions: string[] = [];
+  let currentIndex = 0;
+  let loaderTimeout: any;
+
+  // Touch Swipe Variables
+  let touchStartX = 0;
+  let touchEndX = 0;
+
+  document.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement;
+    const photoTrigger = target.closest('.photo-trigger');
+    
+    if (photoTrigger) {
+      const allPhotos = Array.from(document.querySelectorAll('.photo-trigger'));
+      currentImages = allPhotos.map(p => p.getAttribute('data-full-url') || '');
+      currentCaptions = allPhotos.map(p => p.getAttribute('data-title') || '');
+      
+      currentIndex = allPhotos.indexOf(photoTrigger);
+      updateLightbox();
+      
+      lightbox?.classList.remove('hidden');
+      lightbox?.classList.add('flex');
+      document.body.style.overflow = 'hidden'; 
+    }
+  });
+
+  function preloadNextImage() {
+    const nextIndex = (currentIndex + 1) % currentImages.length;
+    const img = new Image();
+    img.src = currentImages[nextIndex];
+  }
+
+  function updateLightbox() {
+    if (!lightboxImg || !currentImages.length) return;
+
+    clearTimeout(loaderTimeout);
+    loaderTimeout = setTimeout(() => loader?.classList.remove('hidden'), 300);
+
+    lightboxImg.style.opacity = '0';
+    
+    // Update the SRC immediately so the browser "knows" this is the new image
+    const newSrc = currentImages[currentIndex];
+    lightboxImg.src = newSrc;
+    
+    // Setting the 'alt' helps with right-click context
+    lightboxImg.alt = currentCaptions[currentIndex];
+    
+    if (lightboxCaption) {
+      lightboxCaption.textContent = currentCaptions[currentIndex];
+    }
+
+    lightboxImg.onload = () => {
+      clearTimeout(loaderTimeout);
+      loader?.classList.add('hidden');
+      lightboxImg.style.opacity = '1';
+      preloadNextImage();
+    };
+  }
+
+  const close = () => {
+    lightbox?.classList.add('hidden');
+    lightbox?.classList.remove('flex');
+    document.body.style.overflow = 'auto';
+    clearTimeout(loaderTimeout);
+  };
+
+  // Navigation Logic
+  const navigateNext = () => {
+    currentIndex = (currentIndex + 1) % currentImages.length;
+    updateLightbox();
+  };
+
+  const navigatePrev = () => {
+    currentIndex = (currentIndex - 1 + currentImages.length) % currentImages.length;
+    updateLightbox();
+  };
+
+  // Event Listeners
+  closeBtn?.addEventListener('click', close);
+  
+  // Close on background click
+  lightbox?.addEventListener('click', (e) => { 
+    // If the user clicked the actual image, do nothing
+    if (e.target === lightboxImg) {
+      return;
+    }
+    
+    // If the user clicked the dark backdrop, close it
+    if (e.target === lightbox || (e.target as HTMLElement).id === 'lightbox-content-wrapper') {
+      close(); 
+    }
+  });
+
+  nextBtn?.addEventListener('click', (e) => { e.stopPropagation(); navigateNext(); });
+  prevBtn?.addEventListener('click', (e) => { e.stopPropagation(); navigatePrev(); });
+
+  // --- SWIPE GESTURE SUPPORT ---
+  lightbox?.addEventListener('touchstart', (e) => {
+    touchStartX = e.changedTouches[0].screenX;
+  }, { passive: true });
+
+  lightbox?.addEventListener('touchend', (e) => {
+    touchEndX = e.changedTouches[0].screenX;
+    handleSwipe();
+  }, { passive: true });
+
+  function handleSwipe() {
+    const swipeDistance = touchEndX - touchStartX;
+    const threshold = 50; // Pixels required to trigger
+
+    if (swipeDistance < -threshold) {
+      navigateNext(); // Swiped Left
+    } else if (swipeDistance > threshold) {
+      navigatePrev(); // Swiped Right
+    }
+  }
+
+  // Keyboard support
+  document.addEventListener('keydown', (e) => {
+    if (lightbox?.classList.contains('hidden')) return;
+    if (e.key === 'Escape') close();
+    if (e.key === 'ArrowRight') navigateNext();
+    if (e.key === 'ArrowLeft') navigatePrev();
+  });
+</script>
