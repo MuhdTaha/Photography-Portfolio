@@ -1,0 +1,75 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Photo from '../components/Photo.astro';
+import { client } from '../lib/sanity';
+import { ALL_PHOTOS_QUERY } from '../utils/queries';
+import categoryData from '../data/category.json';
+
+export async function getStaticPaths() {
+  return [
+    { params: { category: 'automotive' } },
+    { params: { category: 'sports' } },
+    { params: { category: 'portraits' } },
+    { params: { category: 'nature' } },
+  ];
+}
+
+const { category } = Astro.params;
+const allPhotos = await client.fetch(ALL_PHOTOS_QUERY);
+
+// Filter photos for this specific category
+const categoryPhotos = allPhotos.filter(
+  (p) => p.category?.toLowerCase() === category.toLowerCase()
+);
+
+const description = categoryData[category as keyof typeof categoryData];
+const displayTitle = category.charAt(0).toUpperCase() + category.slice(1);
+---
+
+<Layout title={`${displayTitle} | Ali1_Visuals`}>
+  <main class="min-h-screen bg-obsidian pb-15">
+    <div class="h-20 md:h-22"></div>
+
+    <div class="max-w-7xl mx-auto px-6">
+      
+      <a href="/" class="group flex items-center gap-2 mb-10 w-fit text-[10px] font-bold uppercase tracking-[0.3em] text-gray-500 hover:text-brand-gold transition-colors leading-none">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 transition-transform group-hover:-translate-x-1"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        <span class="inline-block leading-none">Back to Overview</span>
+      </a>
+
+      <header class="relative mb-18">
+        <div class="w-full text-center mb-10">
+          <h1 class="font-display text-7xl font-black uppercase tracking-tighter italic leading-[0.8] text-white">
+            {displayTitle}<span class="text-brand-gold">.</span>
+          </h1>
+        </div>
+
+        <div class="w-full border-t border-brand-gold/30 pt-6 text-center">
+          <p class="text-[10px] font-black uppercase tracking-[0.4em] text-brand-gold mb-4">
+            The Narrative
+          </p>
+          
+          <p class="max-full text-sm md:text-base font-light italic leading-relaxed text-gray-400">
+            {description}
+          </p>
+        </div>
+      </header>
+
+      <div class="columns-1 md:columns-2 lg:columns-3 gap-4 space-y-4">
+        {categoryPhotos.map((photo) => (
+          <Photo 
+            publicId={photo.publicId} 
+            title={photo.title} 
+            alt={photo.alt} 
+          />
+        ))}
+      </div>
+
+      {categoryPhotos.length === 0 && (
+        <div class="py-40 text-center border border-white/5 bg-card-dark rounded-sm">
+          <p class="text-gray-600 uppercase tracking-[0.5em] text-[10px]">Collection Coming Soon</p>
+        </div>
+      )}
+    </div>
+  </main>
+</Layout>

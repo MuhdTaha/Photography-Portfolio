@@ -1,11 +1,13 @@
 ---
 // src/components/Hero.astro
+
+import siteData from '../data/site.json';
 ---
 <section class="relative flex h-[80vh] items-center justify-center overflow-hidden bg-obsidian">
   <div class="absolute inset-0 z-0">
     <div class="absolute inset-0 bg-gradient-to-b from-obsidian/20 via-obsidian/60 to-obsidian z-10"></div>
     <img 
-      src="https://res.cloudinary.com/decb5tycx/image/upload/v1774320592/samples/ecommerce/car-interior-design.jpg" 
+      src=  {siteData.hero_image} 
       class="h-full w-full object-cover grayscale-[20%]" 
       alt="Cinematic Automotive Photography"
     />
