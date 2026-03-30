@@ -12,6 +12,7 @@
     "astro": "astro"
   },
   "dependencies": {
+    "@astrojs/vercel": "^10.0.3",
     "@sanity/astro": "^3.3.1",
     "@sanity/client": "^7.20.0",
     "@tailwindcss/vite": "^4.2.2",
@@ -20,6 +21,7 @@
     "react-dom": "^19.2.4",
     "react-is": "^19.2.4",
     "sanity": "^5.17.1",
+    "sanity-plugin-cloudinary": "^1.4.1",
     "styled-components": "^6.3.12",
     "tailwindcss": "^4.2.2"
   }

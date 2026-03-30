@@ -1,5 +1,6 @@
 ---
 // src/components/Gallery.astro
+
 import { client } from '../lib/sanity';
 import { ALL_PHOTOS_QUERY } from '../utils/queries';
 const photos = await client.fetch(ALL_PHOTOS_QUERY);

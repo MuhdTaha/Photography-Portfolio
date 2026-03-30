@@ -1,0 +1,50 @@
+---
+// src/pages/admin/[...index].astro
+
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout title="CMS Admin | Ali1_Visuals">
+  <main class="min-h-screen bg-[#101112]">
+    <div id="sanity"></div>
+  </main>
+</Layout>
+
+<script>
+  import { defineConfig, renderStudio } from 'sanity';
+  import { deskTool } from 'sanity/desk';
+  import { cloudinarySchemaPlugin } from 'sanity-plugin-cloudinary';
+
+  // Import your schema types
+  import photo from '../../../cms/schemaTypes/photo';
+
+  const config = defineConfig({
+    projectId: import.meta.env.PUBLIC_SANITY_PROJECT_ID,
+    dataset: import.meta.env.PUBLIC_SANITY_DATASET,
+    title: 'Ali1_Visuals Admin',
+    basePath: '/admin', // This must match the folder name in src/pages
+    plugins: [
+      deskTool(),
+      cloudinarySchemaPlugin(),
+    ],
+    schema: {
+      types: [photo],
+    },
+  });
+
+  renderStudio(document.getElementById('sanity'), config);
+</script>
+
+<style is:global>
+  /* This ensures the Sanity Studio fills the whole screen and overrides layout padding */
+  html, body, #sanity {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+  
+  /* Hide the site header/footer ONLY on the admin page */
+  nav, footer {
+    display: none !important;
+  }
+</style>
