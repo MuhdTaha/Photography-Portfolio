@@ -3,13 +3,13 @@ import { sanityClient } from "sanity:client";
 export const client = sanityClient;
 
 export async function getPhotos() {
-  // This "GROQ" query asks Sanity for all documents of type 'photo'
-  // and specifically grabs the Cloudinary URL from the nested object
-  const query = `*[_type == "photo"]{
+  // Sanity query to fetch photos with necessary fields
+  const query = `*[_type == "photo"] | order(order asc) {
     title,
     category,
-    featured,
-    "imageUrl": image.derived[0].secure_url || image.secure_url
+    order,
+    "publicId": image.public_id,
+    "alt": title
   }`;
   
   return await sanityClient.fetch(query);

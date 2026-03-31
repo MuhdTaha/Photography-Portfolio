@@ -54,25 +54,24 @@ import siteData from '../data/site.json';
         <div class="relative">
           <div class="absolute -inset-1 rounded-lg bg-linear-to-r from-brand-gold/20 to-transparent blur-xl opacity-50"></div>
           
-          <form 
-            action="https://formspree.io/f/your-id" 
-            method="POST"
+          <form
+            id="contact-form"
             class="relative space-y-4 rounded-xl border border-white/5 bg-card-dark p-8 md:p-10 shadow-2xl"
           >
             <div class="grid gap-4 md:grid-cols-2">
               <div class="space-y-2">
-                <label class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Name</label>
-                <input type="text" name="name" required class="w-full rounded-sm border border-white/10 bg-obsidian p-4 text-white outline-none focus:border-brand-gold transition-all" />
+                <label for="name" class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Name</label>
+                <input id="name" type="text" name="name" required class="w-full rounded-sm border border-white/10 bg-obsidian p-4 text-white outline-none focus:border-brand-gold transition-all" />
               </div>
               <div class="space-y-2">
-                <label class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Email</label>
-                <input type="email" name="email" required class="w-full rounded-sm border border-white/10 bg-obsidian p-4 text-white outline-none focus:border-brand-gold transition-all" />
+                <label for="email" class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Email</label>
+                <input id="email" type="email" name="email" required class="w-full rounded-sm border border-white/10 bg-obsidian p-4 text-white outline-none focus:border-brand-gold transition-all" />
               </div>
             </div>
             
             <div class="space-y-2">
-              <label class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Subject (Category)</label>
-              <select name="category" class="w-full rounded-sm border border-white/10 bg-obsidian p-4 text-white outline-none focus:border-brand-gold transition-all appearance-none">
+              <label for="category" class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Subject (Category)</label>
+              <select id="category" name="category" class="w-full rounded-sm border border-white/10 bg-obsidian p-4 text-white outline-none focus:border-brand-gold transition-all appearance-none">
                 <option>Automotive</option>
                 <option>Sports</option>
                 <option>Portraits</option>
@@ -82,17 +81,88 @@ import siteData from '../data/site.json';
             </div>
 
             <div class="space-y-2">
-              <label class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Message</label>
-              <textarea name="message" rows="5" required class="w-full rounded-sm border border-white/10 bg-obsidian p-4 text-white outline-none focus:border-brand-gold transition-all resize-none"></textarea>
+              <label for="message" class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Message</label>
+              <textarea id="message" name="message" rows="5" required class="w-full rounded-sm border border-white/10 bg-obsidian p-4 text-white outline-none focus:border-brand-gold transition-all resize-none"></textarea>
             </div>
 
             <button type="submit" class="mt-4 w-full rounded-sm bg-brand-gold py-5 text-xs font-black uppercase tracking-[0.2em] text-black transition-all hover:bg-brand-light-gold hover:scale-[1.01] active:scale-95">
               Send Message
             </button>
           </form>
-        </div>
 
+          <div
+            id="response-msg"
+            role="status"
+            aria-live="polite"
+            class="pointer-events-none absolute -top-4 right-0 z-20 flex max-w-75 items-center gap-3 rounded-md border border-brand-gold/30 bg-obsidian/95 px-4 py-3 text-xs font-bold uppercase tracking-[0.14em] text-brand-gold opacity-0 translate-y-2 scale-95 transition-all duration-500"
+          >
+            <span id="response-dot" class="h-2 w-2 rounded-full bg-brand-gold shadow-[0_0_10px_rgba(197,160,89,0.6)]"></span>
+            <span id="response-text">Message sent successfully.</span>
+          </div>
+        </div>
       </div>
     </section>
   </main>
 </Layout>
+
+<script>
+  const form = document.getElementById('contact-form') as HTMLFormElement;
+  const msg = document.getElementById('response-msg');
+  const msgText = document.getElementById('response-text');
+  const msgDot = document.getElementById('response-dot');
+  const submitBtn = form?.querySelector('button[type="submit"]') as HTMLButtonElement | null;
+  let hideTimer: ReturnType<typeof setTimeout> | undefined;
+
+  const showMessage = (text: string, isSuccess: boolean) => {
+    if (!msg || !msgText || !msgDot) return;
+
+    msgText.innerText = text;
+
+    msg.classList.remove('border-brand-gold/30', 'text-brand-gold', 'border-red-500/40', 'text-red-300');
+    msgDot.classList.remove('bg-brand-gold', 'shadow-[0_0_10px_rgba(197,160,89,0.6)]', 'bg-red-400', 'shadow-[0_0_10px_rgba(248,113,113,0.7)]');
+
+    if (isSuccess) {
+      msg.classList.add('border-brand-gold/30', 'text-brand-gold');
+      msgDot.classList.add('bg-brand-gold', 'shadow-[0_0_10px_rgba(197,160,89,0.6)]');
+    } else {
+      msg.classList.add('border-red-500/40', 'text-red-300');
+      msgDot.classList.add('bg-red-400', 'shadow-[0_0_10px_rgba(248,113,113,0.7)]');
+    }
+
+    msg.classList.remove('opacity-0', 'translate-y-2', 'scale-95');
+    msg.classList.add('opacity-100', 'translate-y-0', 'scale-100');
+
+    if (hideTimer) clearTimeout(hideTimer);
+    hideTimer = setTimeout(() => {
+      msg.classList.remove('opacity-100', 'translate-y-0', 'scale-100');
+      msg.classList.add('opacity-0', 'translate-y-2', 'scale-95');
+    }, 3800);
+  };
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(form);
+
+    submitBtn?.setAttribute('disabled', 'true');
+    submitBtn?.classList.add('opacity-70', 'cursor-not-allowed');
+
+    try {
+      const res = await fetch('/api/send-email', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (res.ok) {
+        form.reset();
+        showMessage('Message sent successfully!', true);
+      } else {
+        showMessage('Could not send message. Please try again.', false);
+      }
+    } catch {
+      showMessage('Network error. Please try again.', false);
+    } finally {
+      submitBtn?.removeAttribute('disabled');
+      submitBtn?.classList.remove('opacity-70', 'cursor-not-allowed');
+    }
+  });
+</script>
