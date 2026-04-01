@@ -25,6 +25,7 @@
         id="lightbox-img" 
         src="" 
         alt="" 
+        draggable="false"
         class="max-w-full max-h-full w-auto h-auto object-contain shadow-2xl transition-opacity duration-300 pointer-events-auto select-none z-[110]"
       />
     </div>
@@ -33,137 +34,160 @@
 </div>
 
 <script>
-  const lightbox = document.getElementById('lightbox');
-  const loader = document.getElementById('lightbox-loader');
-  const lightboxImg = document.getElementById('lightbox-img') as HTMLImageElement;
-  const lightboxCaption = document.getElementById('lightbox-caption');
-  const closeBtn = document.getElementById('close-lightbox');
-  const prevBtn = document.getElementById('prev-photo');
-  const nextBtn = document.getElementById('next-photo');
+  type CleanupFn = () => void;
 
-  let currentImages: string[] = [];
-  let currentCaptions: string[] = [];
-  let currentIndex = 0;
-  let loaderTimeout: any;
-
-  // Touch Swipe Variables
-  let touchStartX = 0;
-  let touchEndX = 0;
-
-  document.addEventListener('click', (e) => {
-    const target = e.target as HTMLElement;
-    const photoTrigger = target.closest('.photo-trigger');
-    
-    if (photoTrigger) {
-      const allPhotos = Array.from(document.querySelectorAll('.photo-trigger'));
-      currentImages = allPhotos.map(p => p.getAttribute('data-full-url') || '');
-      currentCaptions = allPhotos.map(p => p.getAttribute('data-title') || '');
-      
-      currentIndex = allPhotos.indexOf(photoTrigger);
-      updateLightbox();
-      
-      lightbox?.classList.remove('hidden');
-      lightbox?.classList.add('flex');
-      document.body.style.overflow = 'hidden'; 
+  declare global {
+    interface Window {
+      __lightboxCleanup?: CleanupFn;
+      __lightboxPageLoadBound?: boolean;
     }
-  });
-
-  function preloadNextImage() {
-    const nextIndex = (currentIndex + 1) % currentImages.length;
-    const img = new Image();
-    img.src = currentImages[nextIndex];
   }
 
-  function updateLightbox() {
-    if (!lightboxImg || !currentImages.length) return;
+  function initLightbox() {
+    window.__lightboxCleanup?.();
 
-    clearTimeout(loaderTimeout);
-    loaderTimeout = setTimeout(() => loader?.classList.remove('hidden'), 300);
+    const lightbox = document.getElementById('lightbox');
+    const loader = document.getElementById('lightbox-loader');
+    const lightboxImg = document.getElementById('lightbox-img') as HTMLImageElement | null;
+    const lightboxCaption = document.getElementById('lightbox-caption');
+    const closeBtn = document.getElementById('close-lightbox');
+    const prevBtn = document.getElementById('prev-photo');
+    const nextBtn = document.getElementById('next-photo');
 
-    lightboxImg.style.opacity = '0';
-    
-    // Update the SRC immediately so the browser "knows" this is the new image
-    const newSrc = currentImages[currentIndex];
-    lightboxImg.src = newSrc;
-    
-    // Setting the 'alt' helps with right-click context
-    lightboxImg.alt = currentCaptions[currentIndex];
-    
-    if (lightboxCaption) {
-      lightboxCaption.textContent = currentCaptions[currentIndex];
-    }
+    let currentImages: string[] = [];
+    let currentCaptions: string[] = [];
+    let currentIndex = 0;
+    let loaderTimeout: ReturnType<typeof setTimeout> | undefined;
+    let touchStartX = 0;
+    let touchEndX = 0;
 
-    lightboxImg.onload = () => {
-      clearTimeout(loaderTimeout);
-      loader?.classList.add('hidden');
-      lightboxImg.style.opacity = '1';
-      preloadNextImage();
+    const preloadNextImage = () => {
+      if (!currentImages.length) return;
+      const nextIndex = (currentIndex + 1) % currentImages.length;
+      const img = new Image();
+      img.src = currentImages[nextIndex];
+    };
+
+    const updateLightbox = () => {
+      if (!lightboxImg || !currentImages.length) return;
+
+      if (loaderTimeout) clearTimeout(loaderTimeout);
+      loaderTimeout = setTimeout(() => loader?.classList.remove('hidden'), 300);
+
+      lightboxImg.style.opacity = '0';
+      lightboxImg.src = currentImages[currentIndex];
+      lightboxImg.alt = currentCaptions[currentIndex];
+
+      if (lightboxCaption) {
+        lightboxCaption.textContent = currentCaptions[currentIndex];
+      }
+
+      lightboxImg.onload = () => {
+        if (loaderTimeout) clearTimeout(loaderTimeout);
+        loader?.classList.add('hidden');
+        lightboxImg.style.opacity = '1';
+        preloadNextImage();
+      };
+    };
+
+    const close = () => {
+      lightbox?.classList.add('hidden');
+      lightbox?.classList.remove('flex');
+      document.body.style.overflow = 'auto';
+      if (loaderTimeout) clearTimeout(loaderTimeout);
+    };
+
+    const navigateNext = () => {
+      currentIndex = (currentIndex + 1) % currentImages.length;
+      updateLightbox();
+    };
+
+    const navigatePrev = () => {
+      currentIndex = (currentIndex - 1 + currentImages.length) % currentImages.length;
+      updateLightbox();
+    };
+
+    const onDocumentClick = (e: MouseEvent) => {
+      if (!(e.target instanceof Element)) return;
+
+      const photoTrigger = e.target.closest('.photo-trigger[data-full-url]');
+      if (!photoTrigger) return;
+
+      const allPhotos = Array.from(document.querySelectorAll('.photo-trigger[data-full-url]'));
+      currentImages = allPhotos.map((p) => p.getAttribute('data-full-url') || '');
+      currentCaptions = allPhotos.map((p) => p.getAttribute('data-title') || '');
+      currentIndex = allPhotos.indexOf(photoTrigger);
+
+      updateLightbox();
+      lightbox?.classList.remove('hidden');
+      lightbox?.classList.add('flex');
+      document.body.style.overflow = 'hidden';
+    };
+
+    const onLightboxClick = (e: MouseEvent) => {
+      if (e.target === lightboxImg) return;
+
+      const isController = (e.target as HTMLElement).closest('button');
+      if (e.target !== lightboxImg && !isController) {
+        close();
+      }
+    };
+
+    const onNextClick = (e: MouseEvent) => {
+      e.stopPropagation();
+      navigateNext();
+    };
+
+    const onPrevClick = (e: MouseEvent) => {
+      e.stopPropagation();
+      navigatePrev();
+    };
+
+    const onTouchStart = (e: TouchEvent) => {
+      touchStartX = e.changedTouches[0].screenX;
+    };
+
+    const onTouchEnd = (e: TouchEvent) => {
+      touchEndX = e.changedTouches[0].screenX;
+      const swipeDistance = touchEndX - touchStartX;
+      const threshold = 50;
+
+      if (swipeDistance < -threshold) navigateNext();
+      else if (swipeDistance > threshold) navigatePrev();
+    };
+
+    const onKeydown = (e: KeyboardEvent) => {
+      if (lightbox?.classList.contains('hidden')) return;
+      if (e.key === 'Escape') close();
+      if (e.key === 'ArrowRight') navigateNext();
+      if (e.key === 'ArrowLeft') navigatePrev();
+    };
+
+    document.addEventListener('click', onDocumentClick);
+    document.addEventListener('keydown', onKeydown);
+    closeBtn?.addEventListener('click', close);
+    lightbox?.addEventListener('click', onLightboxClick);
+    nextBtn?.addEventListener('click', onNextClick);
+    prevBtn?.addEventListener('click', onPrevClick);
+    lightbox?.addEventListener('touchstart', onTouchStart, { passive: true });
+    lightbox?.addEventListener('touchend', onTouchEnd, { passive: true });
+
+    window.__lightboxCleanup = () => {
+      document.removeEventListener('click', onDocumentClick);
+      document.removeEventListener('keydown', onKeydown);
+      closeBtn?.removeEventListener('click', close);
+      lightbox?.removeEventListener('click', onLightboxClick);
+      nextBtn?.removeEventListener('click', onNextClick);
+      prevBtn?.removeEventListener('click', onPrevClick);
+      lightbox?.removeEventListener('touchstart', onTouchStart);
+      lightbox?.removeEventListener('touchend', onTouchEnd);
     };
   }
 
-  const close = () => {
-    lightbox?.classList.add('hidden');
-    lightbox?.classList.remove('flex');
-    document.body.style.overflow = 'auto';
-    clearTimeout(loaderTimeout);
-  };
-
-  // Navigation Logic
-  const navigateNext = () => {
-    currentIndex = (currentIndex + 1) % currentImages.length;
-    updateLightbox();
-  };
-
-  const navigatePrev = () => {
-    currentIndex = (currentIndex - 1 + currentImages.length) % currentImages.length;
-    updateLightbox();
-  };
-
-  // Event Listeners
-  closeBtn?.addEventListener('click', close);
-  
-  // Close on background click
-  lightbox?.addEventListener('click', (e) => { 
-    // If the user clicked the actual image, do nothing
-    if (e.target === lightboxImg) {
-      return;
-    }
-    
-    // If the user clicked the dark backdrop, close it
-    if (e.target === lightbox || (e.target as HTMLElement).id === 'lightbox-content-wrapper') {
-      close(); 
-    }
-  });
-
-  nextBtn?.addEventListener('click', (e) => { e.stopPropagation(); navigateNext(); });
-  prevBtn?.addEventListener('click', (e) => { e.stopPropagation(); navigatePrev(); });
-
-  // --- SWIPE GESTURE SUPPORT ---
-  lightbox?.addEventListener('touchstart', (e) => {
-    touchStartX = e.changedTouches[0].screenX;
-  }, { passive: true });
-
-  lightbox?.addEventListener('touchend', (e) => {
-    touchEndX = e.changedTouches[0].screenX;
-    handleSwipe();
-  }, { passive: true });
-
-  function handleSwipe() {
-    const swipeDistance = touchEndX - touchStartX;
-    const threshold = 50; // Pixels required to trigger
-
-    if (swipeDistance < -threshold) {
-      navigateNext(); // Swiped Left
-    } else if (swipeDistance > threshold) {
-      navigatePrev(); // Swiped Right
-    }
+  if (!window.__lightboxPageLoadBound) {
+    document.addEventListener('astro:page-load', initLightbox);
+    window.__lightboxPageLoadBound = true;
   }
 
-  // Keyboard support
-  document.addEventListener('keydown', (e) => {
-    if (lightbox?.classList.contains('hidden')) return;
-    if (e.key === 'Escape') close();
-    if (e.key === 'ArrowRight') navigateNext();
-    if (e.key === 'ArrowLeft') navigatePrev();
-  });
+  initLightbox();
 </script>
