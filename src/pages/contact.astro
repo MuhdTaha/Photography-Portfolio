@@ -5,46 +5,50 @@ import siteData from '../data/site.json';
 
 <Layout title="Contact | Ali1_Visuals">
   <main class="min-h-screen bg-obsidian">
-    <div class="h-10"></div>
+    <div class="h-12 md:h-10"></div>
 
-    <section class="mx-auto max-w-7xl px-6 py-20">
-      <div class="grid gap-16 lg:grid-cols-2">
+    <section class="mx-auto max-w-7xl px-4 pt-10 pb-3 sm:px-6 sm:pt-14 sm:pb-6 md:pt-20 md:pb-10">
+      <div class="grid gap-10 md:gap-12 lg:grid-cols-2 lg:gap-16">
         
-        <div class="flex flex-col justify-center">
-          <h1 class="font-display text-5xl font-black uppercase tracking-tighter md:text-7xl">
+        <div class="flex flex-col justify-center text-center lg:text-left">
+          <h1 class="font-display text-4xl font-black uppercase tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
             Get in <span class="text-brand-gold">Touch</span>
           </h1>
           
-          <div class="mt-8 space-y-6">
-            <p class="max-w-md text-lg leading-relaxed text-gray-400">
+          <div class="mt-6 space-y-5 sm:mt-8 sm:space-y-6">
+            <p class="mx-auto max-w-none text-base leading-relaxed text-gray-400 sm:max-w-md sm:text-lg lg:mx-0">
               {siteData.contact_text}
             </p>
             
-            <div class="space-y-4">
-              <div class="group flex items-center gap-4">
-                <div class="flex h-10 w-10 items-center justify-center rounded-full border border-brand-gold/20 bg-brand-gold/5 text-brand-gold">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <div class="space-y-6">
+              <div class="group flex items-center gap-3 text-left sm:gap-4">
+                <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-brand-gold/20 bg-brand-gold/5 text-brand-gold transition-colors group-hover:border-brand-gold/50">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                     <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
                     <path d="M16 11.37a4 4 0 1 1-1.09-4.31 4 4 0 0 1 1.09 4.31z"></path>
                     <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
                   </svg>
                 </div>
-                <div>
-                  <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Instagram</p>
-                  <a href={siteData.instagram} target="_blank" class="text-white hover:text-brand-gold transition-colors">@Ali1_Visuals</a>
+                <div class="flex flex-col items-start">
+                  <p class="text-[9px] font-bold uppercase tracking-[0.3em] text-gray-500">Instagram</p>
+                  <a href={siteData.instagram} target="_blank" class="text-sm font-medium text-white hover:text-brand-gold transition-colors sm:text-base">
+                    @Ali1_Visuals
+                  </a>
                 </div>
               </div>
 
-              <div class="group flex items-center gap-4">
-                <div class="flex h-10 w-10 items-center justify-center rounded-full border border-brand-gold/20 bg-brand-gold/5 text-brand-gold">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <div class="group flex items-center gap-3 text-left sm:gap-4">
+                <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-brand-gold/20 bg-brand-gold/5 text-brand-gold transition-colors group-hover:border-brand-gold/50">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                     <rect x="3" y="5" width="18" height="14" rx="2"></rect>
                     <path d="M3 7l9 6 9-6"></path>
                   </svg>
                 </div>
-                <div>
-                  <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Email</p>
-                  <a href={`mailto:${siteData.email}`} class="text-white hover:text-brand-gold transition-colors">{siteData.email}</a>
+                <div class="flex flex-col items-start">
+                  <p class="text-[9px] font-bold uppercase tracking-[0.3em] text-gray-500">Email</p>
+                  <a href={`mailto:${siteData.email}`} class="text-sm font-medium text-white hover:text-brand-gold transition-colors sm:text-base">
+                    {siteData.email}
+                  </a>
                 </div>
               </div>
             </div>
@@ -56,22 +60,22 @@ import siteData from '../data/site.json';
           
           <form
             id="contact-form"
-            class="relative space-y-4 rounded-xl border border-white/5 bg-card-dark p-8 md:p-10 shadow-2xl"
+            class="relative space-y-4 rounded-xl border border-white/5 bg-card-dark p-5 sm:p-7 md:p-10 shadow-2xl"
           >
             <div class="grid gap-4 md:grid-cols-2">
               <div class="space-y-2">
                 <label for="name" class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Name</label>
-                <input id="name" type="text" name="name" required class="w-full rounded-sm border border-white/10 bg-obsidian p-4 text-white outline-none focus:border-brand-gold transition-all" />
+                <input id="name" type="text" name="name" required class="w-full rounded-sm border border-white/10 bg-obsidian p-3 text-white outline-none transition-all focus:border-brand-gold sm:p-4" />
               </div>
               <div class="space-y-2">
                 <label for="email" class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Email</label>
-                <input id="email" type="email" name="email" required class="w-full rounded-sm border border-white/10 bg-obsidian p-4 text-white outline-none focus:border-brand-gold transition-all" />
+                <input id="email" type="email" name="email" required class="w-full rounded-sm border border-white/10 bg-obsidian p-3 text-white outline-none transition-all focus:border-brand-gold sm:p-4" />
               </div>
             </div>
             
             <div class="space-y-2">
               <label for="category" class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Subject (Category)</label>
-              <select id="category" name="category" class="w-full rounded-sm border border-white/10 bg-obsidian p-4 text-white outline-none focus:border-brand-gold transition-all appearance-none">
+              <select id="category" name="category" class="w-full appearance-none rounded-sm border border-white/10 bg-obsidian p-3 text-white outline-none transition-all focus:border-brand-gold sm:p-4">
                 <option>Automotive</option>
                 <option>Sports</option>
                 <option>Portraits</option>
@@ -82,10 +86,10 @@ import siteData from '../data/site.json';
 
             <div class="space-y-2">
               <label for="message" class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Message</label>
-              <textarea id="message" name="message" rows="5" required class="w-full rounded-sm border border-white/10 bg-obsidian p-4 text-white outline-none focus:border-brand-gold transition-all resize-none"></textarea>
+              <textarea id="message" name="message" rows="5" required class="w-full resize-none rounded-sm border border-white/10 bg-obsidian p-3 text-white outline-none transition-all focus:border-brand-gold sm:p-4"></textarea>
             </div>
 
-            <button type="submit" class="mt-4 w-full rounded-sm bg-brand-gold py-5 text-xs font-black uppercase tracking-[0.2em] text-black transition-all hover:bg-brand-light-gold hover:scale-[1.01] active:scale-95">
+            <button type="submit" class="mt-4 w-full rounded-sm bg-brand-gold py-4 text-[10px] font-black uppercase tracking-[0.2em] text-black transition-all hover:bg-brand-light-gold hover:scale-[1.01] active:scale-95 sm:py-5 sm:text-xs">
               Send Message
             </button>
           </form>
@@ -94,7 +98,7 @@ import siteData from '../data/site.json';
             id="response-msg"
             role="status"
             aria-live="polite"
-            class="pointer-events-none absolute -top-4 right-0 z-20 flex max-w-75 items-center gap-3 rounded-md border border-brand-gold/30 bg-obsidian/95 px-4 py-3 text-xs font-bold uppercase tracking-[0.14em] text-brand-gold opacity-0 translate-y-2 scale-95 transition-all duration-500"
+            class="pointer-events-none absolute bottom-3 left-0 right-0 z-20 mx-2 flex max-w-none items-center gap-3 rounded-md border border-brand-gold/30 bg-obsidian/95 px-4 py-3 text-xs font-bold uppercase tracking-[0.14em] text-brand-gold opacity-0 translate-y-2 scale-95 transition-all duration-500 sm:-top-4 sm:bottom-auto sm:left-auto sm:right-0 sm:mx-0 sm:max-w-75"
           >
             <span id="response-dot" class="h-2 w-2 rounded-full bg-brand-gold shadow-[0_0_10px_rgba(197,160,89,0.6)]"></span>
             <span id="response-text">Message sent successfully.</span>

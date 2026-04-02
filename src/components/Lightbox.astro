@@ -1,7 +1,7 @@
 ---
 // src/components/Lightbox.astro
 ---
-<div id="lightbox" class="fixed inset-0 z-[100] hidden bg-black/95 backdrop-blur-sm items-center justify-center cursor-default select-none transition-all duration-300">
+<div id="lightbox" class="fixed inset-0 z-[100] hidden opacity-0 scale-[0.99] bg-black/95 backdrop-blur-sm items-center justify-center cursor-default select-none transition-[opacity,transform] duration-300 ease-out">
   
   <div id="lightbox-loader" class="absolute inset-0 flex items-center justify-center hidden">
     <div class="h-10 w-10 animate-spin rounded-full border-2 border-brand-gold/20 border-t-brand-gold"></div>
@@ -58,8 +58,10 @@
     let currentCaptions: string[] = [];
     let currentIndex = 0;
     let loaderTimeout: ReturnType<typeof setTimeout> | undefined;
+    let closeTimeout: ReturnType<typeof setTimeout> | undefined;
     let touchStartX = 0;
     let touchEndX = 0;
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     const preloadNextImage = () => {
       if (!currentImages.length) return;
@@ -68,15 +70,29 @@
       img.src = currentImages[nextIndex];
     };
 
-    const updateLightbox = () => {
+    const updateLightbox = (direction = 0) => {
       if (!lightboxImg || !currentImages.length) return;
 
       if (loaderTimeout) clearTimeout(loaderTimeout);
       loaderTimeout = setTimeout(() => loader?.classList.remove('hidden'), 300);
 
-      lightboxImg.style.opacity = '0';
-      lightboxImg.src = currentImages[currentIndex];
-      lightboxImg.alt = currentCaptions[currentIndex];
+      const applyImage = () => {
+        lightboxImg.src = currentImages[currentIndex];
+        lightboxImg.alt = currentCaptions[currentIndex];
+      };
+
+      if (!prefersReducedMotion && lightboxImg.src && direction !== 0) {
+        lightboxImg.animate(
+          [
+            { opacity: 1, transform: 'translateX(0px)' },
+            { opacity: 0, transform: `translateX(${direction * 22}px)` }
+          ],
+          { duration: 180, easing: 'ease-in', fill: 'forwards' }
+        ).onfinish = applyImage;
+      } else {
+        lightboxImg.style.opacity = '0';
+        applyImage();
+      }
 
       if (lightboxCaption) {
         lightboxCaption.textContent = currentCaptions[currentIndex];
@@ -85,26 +101,49 @@
       lightboxImg.onload = () => {
         if (loaderTimeout) clearTimeout(loaderTimeout);
         loader?.classList.add('hidden');
-        lightboxImg.style.opacity = '1';
+
+        if (!prefersReducedMotion) {
+          const fromX = direction === 0 ? 0 : direction * -22;
+          lightboxImg.animate(
+            [
+              { opacity: 0, transform: `translateX(${fromX}px)` },
+              { opacity: 1, transform: 'translateX(0px)' }
+            ],
+            { duration: 260, easing: 'ease-out', fill: 'forwards' }
+          );
+        } else {
+          lightboxImg.style.opacity = '1';
+          lightboxImg.style.transform = 'translateX(0px)';
+        }
+
         preloadNextImage();
       };
     };
 
     const close = () => {
-      lightbox?.classList.add('hidden');
-      lightbox?.classList.remove('flex');
+      if (!lightbox) return;
+      if (closeTimeout) clearTimeout(closeTimeout);
+
+      lightbox.classList.remove('opacity-100', 'scale-100');
+      lightbox.classList.add('opacity-0', 'scale-[0.99]');
+
+      closeTimeout = setTimeout(() => {
+        lightbox.classList.add('hidden');
+        lightbox.classList.remove('flex');
+      }, prefersReducedMotion ? 0 : 260);
+
       document.body.style.overflow = 'auto';
       if (loaderTimeout) clearTimeout(loaderTimeout);
     };
 
     const navigateNext = () => {
       currentIndex = (currentIndex + 1) % currentImages.length;
-      updateLightbox();
+      updateLightbox(1);
     };
 
     const navigatePrev = () => {
       currentIndex = (currentIndex - 1 + currentImages.length) % currentImages.length;
-      updateLightbox();
+      updateLightbox(-1);
     };
 
     const onDocumentClick = (e: MouseEvent) => {
@@ -118,9 +157,18 @@
       currentCaptions = allPhotos.map((p) => p.getAttribute('data-title') || '');
       currentIndex = allPhotos.indexOf(photoTrigger);
 
-      updateLightbox();
-      lightbox?.classList.remove('hidden');
-      lightbox?.classList.add('flex');
+      if (!lightbox) return;
+
+      if (closeTimeout) clearTimeout(closeTimeout);
+      updateLightbox(0);
+      lightbox.classList.remove('hidden');
+      lightbox.classList.add('flex');
+
+      requestAnimationFrame(() => {
+        lightbox.classList.remove('opacity-0', 'scale-[0.99]');
+        lightbox.classList.add('opacity-100', 'scale-100');
+      });
+
       document.body.style.overflow = 'hidden';
     };
 
@@ -181,6 +229,7 @@
       prevBtn?.removeEventListener('click', onPrevClick);
       lightbox?.removeEventListener('touchstart', onTouchStart);
       lightbox?.removeEventListener('touchend', onTouchEnd);
+      if (closeTimeout) clearTimeout(closeTimeout);
     };
   }
 

@@ -8,7 +8,13 @@ import { client } from '../lib/sanity';
 import { ALL_PHOTOS_QUERY } from '../utils/queries';
 import siteData from '../data/site.json';
 
-const photos = await client.fetch(ALL_PHOTOS_QUERY);
+type GalleryPhoto = {
+  publicId: string;
+  title: string;
+  category?: string;
+};
+
+const photos = await client.fetch(ALL_PHOTOS_QUERY) as GalleryPhoto[];
 const categories = ['Automotive', 'Sports', 'Portraits', 'Nature'];
 ---
 
@@ -16,26 +22,26 @@ const categories = ['Automotive', 'Sports', 'Portraits', 'Nature'];
   <main class="bg-obsidian">
     <Hero />
 
-    <section class="py-22 px-4 text-center max-w-3xl mx-auto">
-      <h1 class="text-brand-gold font-display text-[10px] font-bold tracking-[0.5em] uppercase mb-6">The Vision</h1>
-      <p class="text-xl md:text-2xl font-light leading-relaxed text-gray-300 italic">
+    <section class="mx-auto w-full max-w-3xl px-5 py-14 text-center sm:px-6 md:py-22">
+      <h1 class="mb-4 font-display text-[9px] font-bold uppercase tracking-[0.28em] text-brand-gold sm:mb-6 sm:text-[10px] sm:tracking-[0.5em]">The Vision</h1>
+      <p class="text-base font-light leading-relaxed text-gray-300 italic sm:text-xl md:text-2xl">
         "{siteData.home_text}"
       </p>
     </section>
 
     {categories.map((cat) => {
       // Filter photos for this specific category
-      const categoryPhotos = photos.filter(p => p.category?.toLowerCase() === cat.toLowerCase()).slice(0, 4);
+      const categoryPhotos = photos.filter((p: GalleryPhoto) => p.category?.toLowerCase() === cat.toLowerCase()).slice(0, 4);
       
       return (
-        <section class="mb-32">
-          <div class="max-w-7xl mx-auto px-6 flex items-center gap-4 mb-10">
-            <a href={`/${cat.toLowerCase()}`} class="group relative flex items-center gap-4 pb-2 transition-all hover:opacity-80">
-              <h2 class="font-display text-3xl font-black uppercase tracking-tighter italic group-hover:text-brand-gold transition-colors">
+        <section class="mb-20 sm:mb-24 md:mb-32">
+          <div class="mx-auto mb-7 flex w-full max-w-7xl items-center gap-3 px-4 sm:mb-8 sm:gap-4 sm:px-6 md:mb-10">
+            <a href={`/${cat.toLowerCase()}`} class="group relative flex items-center gap-2 pb-2 transition-all hover:opacity-80 sm:gap-4">
+              <h2 class="font-display text-2xl font-black uppercase tracking-tight italic transition-colors group-hover:text-brand-gold sm:text-3xl">
                 {cat}
               </h2>
       
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-brand-gold opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 -translate-x-1 text-brand-gold opacity-100 transition-all sm:h-6 sm:w-6 sm:-translate-x-2 sm:opacity-0 sm:group-hover:translate-x-0 sm:group-hover:opacity-100">
                 <line x1="5" y1="12" x2="19" y2="12"></line>
                 <polyline points="12 5 19 12 12 19"></polyline>
               </svg>
@@ -44,8 +50,8 @@ const categories = ['Automotive', 'Sports', 'Portraits', 'Nature'];
             <div class="h-px flex-1 bg-linear-to-r from-brand-gold/40 to-transparent"></div>
           </div>
           
-          <div class="max-w-7xl mx-auto px-4 columns-1 md:columns-3 gap-4 space-y-4">
-            {categoryPhotos.map((photo) => (
+          <div class="mx-auto max-w-7xl columns-2 gap-4 space-y-4 px-4 sm:px-6 md:columns-3">
+            {categoryPhotos.map((photo: GalleryPhoto) => (
               <div class="break-inside-avoid"> <Photo 
                   publicId={photo.publicId} 
                   title={photo.title} 

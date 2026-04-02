@@ -1,58 +1,64 @@
 ---
-// src/pages/about.astro
-
 import Layout from '../layouts/Layout.astro';
 import siteData from '../data/site.json';
 ---
 
 <Layout title="About | Ali1_Visuals">
-  <main class="min-h-screen bg-obsidian">
-    <div class="h-10 md:h-10"></div>
+  <main class="min-h-svh bg-obsidian pb-10">
+    <div class="h-24 md:h-32"></div>
 
-    <section class="mx-auto max-w-7xl px-6 py-12 md:py-24">
+    <section class="mx-auto max-w-7xl px-6">
       <div class="grid items-center gap-12 md:grid-cols-2 lg:gap-24">
         
-        <div class="relative order-2 md:order-1">
-          <div class="absolute -bottom-4 -left-4 h-full w-full border border-brand-gold/30"></div>
-          <div class="relative overflow-hidden bg-card-dark shadow-2xl">
-            <img 
-              src={siteData.logo} 
-              alt="Asad Alibhai - Photographer" 
-              class="aspect-4/5 w-full object-cover transition-all duration-700 hover:scale-110"
-            />
+        <div class="relative order-1 flex justify-center md:justify-start">
+          <div class="relative w-full max-w-[85vw] sm:max-w-[60vw] md:max-w-full">
+            <div class="absolute -bottom-4 -left-4 h-full w-full border border-brand-gold/30"></div>
+            
+            <div class="relative overflow-hidden bg-card-dark shadow-2xl">
+              <img 
+                src={siteData.logo} 
+                alt="Asad Alibhai - Photographer" 
+                class="aspect-[4/5] w-full object-cover transition-transform duration-1000 hover:scale-105"
+              />
+            </div>
+            
+            <div class="absolute -top-2 -right-2 h-10 w-10 border-t-2 border-r-2 border-brand-gold"></div>
           </div>
-          <div class="absolute -top-2 -right-2 h-8 w-8 border-t-2 border-r-2 border-brand-gold"></div>
         </div>
 
-        <div class="order-1 md:order-2">
-          <h1 class="font-display text-xs font-bold uppercase tracking-[0.5em] text-brand-gold">
+        <div class="order-2 text-center md:text-left">
+          <h1 class="font-display text-[10px] font-bold uppercase tracking-[0.5em] text-brand-gold">
             The Visionary
           </h1>
-          <h2 class="mt-4 font-display text-5xl font-black uppercase tracking-tighter text-white md:text-7xl">
-            Asad <br /> <span class="text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-500">Alibhai</span>
+          <h2 class="mt-4 font-display text-4xl font-black uppercase tracking-tight text-white sm:text-6xl lg:text-7xl leading-[0.9]">
+            Asad <br /> 
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-500">
+              Alibhai
+            </span>
           </h2>
           
           <div class="mt-8 space-y-6">
-            <p class="text-lg leading-relaxed text-gray-300 font-light">
+            <p class="text-sm leading-relaxed text-gray-400 font-light sm:text-base md:text-lg lg:max-w-xl">
               {siteData.about_text}
             </p>
             
-            <div class="h-px w-20 bg-brand-gold/50"></div>
+            <div class="h-px w-20 bg-brand-gold/40 mx-auto md:mx-0"></div>
             
-            <div class="flex items-center gap-8">
+            <div class="grid grid-cols-2 gap-8 pt-4">
               <div>
-                <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Specialties</p>
-                <p class="mt-1 text-sm font-medium text-white">Auto • Sports • Portraits</p>
+                <p class="text-[9px] font-bold uppercase tracking-[0.3em] text-gray-500 mb-2">Specialties</p>
+                <p class="text-sm font-medium text-white italic">Auto • Sports • Portraits</p>
               </div>
               <div>
-                <p class="text-[10px] font-bold uppercase tracking-widest text-gray-500">Based In</p>
-                <p class="mt-1 text-sm font-medium text-white">IL & IN, USA</p>
+                <p class="text-[9px] font-bold uppercase tracking-[0.3em] text-gray-500 mb-2">Based In</p>
+                <p class="text-sm font-medium text-white italic">IL & IN, USA</p>
               </div>
             </div>
 
-            <div class="pt-8">
-              <a href="/contact" class="inline-block border border-brand-gold px-8 py-4 text-[10px] font-black uppercase tracking-[0.3em] text-brand-gold transition-all duration-700 hover:bg-brand-gold hover:text-black">
+            <div class="pt-10">
+              <a href="/contact" class="group relative inline-flex items-center gap-4 border border-brand-gold/50 px-10 py-4 text-[10px] font-black uppercase tracking-[0.4em] text-white transition-all hover:bg-brand-gold hover:text-black">
                 Work With Me
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="transition-transform group-hover:translate-x-1"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
               </a>
             </div>
           </div>

@@ -12,17 +12,37 @@ const { title } = Astro.props;
 <html lang="en" class="scroll-smooth">
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <link rel="icon" type="image/png" href="/favicon.png" />
     <ClientRouter />
   </head>
   <body class="bg-obsidian text-white font-body selection:bg-brand-gold selection:text-black">
     <nav class="fixed top-0 z-50 w-full border-b border-white/5 bg-obsidian/80 backdrop-blur-md">
-      <div class="mx-auto flex max-w-7xl items-center justify-between p-4 md:px-8">
+      <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 md:px-8 md:py-4">
         <a href="/" class="flex items-center gap-2 group">
           <img src={siteData.logo} alt="Logo" class="h-8 w-8 transition-transform group-hover:rotate-12" />
-          <span class="font-display font-bold tracking-tighter uppercase">Ali1_Visuals</span>
+          <span class="font-display text-sm font-bold tracking-tight uppercase sm:text-base">Ali1_Visuals</span>
         </a>
+
+        <button
+          id="mobile-menu-button"
+          type="button"
+          aria-expanded="false"
+          aria-controls="mobile-menu"
+          aria-label="Toggle navigation menu"
+          class="inline-flex items-center justify-center rounded-sm border border-white/10 p-2 text-white/80 transition hover:border-brand-gold/60 hover:text-brand-gold md:hidden"
+        >
+          <svg id="mobile-menu-open-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+          <svg id="mobile-menu-close-icon" class="hidden" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
         
         <div class="hidden md:flex space-x-6 text-xs font-bold tracking-widest uppercase">
           <a href="/" class="relative group transition hover:text-brand-gold">
@@ -57,14 +77,31 @@ const { title } = Astro.props;
           </a>
         </div>
       </div>
+
+      <div id="mobile-menu" class="hidden pointer-events-none overflow-hidden border-t border-transparent bg-obsidian/95 px-4 pb-4 pt-3 opacity-0 -translate-y-1 transition-[height,opacity,transform,border-color] duration-320 ease-out will-change-[height,opacity,transform] md:hidden">
+        <div class="grid gap-3 text-[11px] font-bold uppercase tracking-[0.25em]">
+          <a href="/" class="mobile-menu-link rounded-sm border border-white/5 px-3 py-2 text-white/80 opacity-0 translate-y-1 transition-all duration-300 hover:border-brand-gold/40 hover:text-brand-gold">Home</a>
+          <a href="/about" class="mobile-menu-link rounded-sm border border-white/5 px-3 py-2 text-white/80 opacity-0 translate-y-1 transition-all duration-300 hover:border-brand-gold/40 hover:text-brand-gold">About</a>
+          <a href="/faq" class="mobile-menu-link rounded-sm border border-white/5 px-3 py-2 text-white/80 opacity-0 translate-y-1 transition-all duration-300 hover:border-brand-gold/40 hover:text-brand-gold">FAQ</a>
+          <a href="/contact" class="mobile-menu-link rounded-sm border border-white/5 px-3 py-2 text-white/80 opacity-0 translate-y-1 transition-all duration-300 hover:border-brand-gold/40 hover:text-brand-gold">Contact</a>
+          <a
+            href={siteData.instagram}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="mobile-menu-link rounded-sm border border-brand-gold/40 px-3 py-2 text-brand-gold opacity-0 translate-y-1 transition-all duration-300 hover:border-brand-gold/70"
+          >
+            Instagram
+          </a>
+        </div>
+      </div>
     </nav>
 
     <slot />
     <Lightbox />
 
-    <footer class="border-t border-white/5 bg-card-dark py-4 mt-10">
-      <div class="max-w-7xl mx-auto px-0 py-0 text-center">
-        <div class="flex flex-col md:flex-row justify-center items-center mt-2 gap-4 md:gap-8 text-xs font-bold uppercase tracking-widest">
+    <footer class="mt-10 border-t border-white/5 bg-card-dark py-7 sm:py-6">
+      <div class="mx-auto max-w-7xl px-4 text-center sm:px-6">
+        <div class="mt-1 flex flex-col items-center justify-center gap-3 text-[11px] font-bold uppercase tracking-[0.22em] sm:text-xs sm:tracking-widest md:flex-row md:gap-8">
           <a href={`mailto:${siteData.email}`} class="text-white hover:text-brand-gold transition-colors">
             {siteData.email}
           </a>
@@ -80,7 +117,7 @@ const { title } = Astro.props;
           <span class="text-gray-400">Based in IL & IN</span>
         </div>
 
-        <p class="mt-6 font-display text-[11px] tracking-[0.3em] text-gray-600 uppercase">
+        <p class="mt-6 font-display text-[10px] tracking-[0.24em] text-gray-600 uppercase sm:text-[11px] sm:tracking-[0.3em]">
           © 2026 Ali1_Visuals — All Rights Reserved
         </p>
 
@@ -88,12 +125,149 @@ const { title } = Astro.props;
           <a 
             href="https://github.com/MuhdTaha" 
             target="_blank" 
-            class="group text-[9px] tracking-[0.4em] text-gray-700 uppercase transition-colors hover:text-brand-gold"
+            class="group text-[9px] tracking-[0.28em] text-gray-700 uppercase transition-colors hover:text-brand-gold sm:tracking-[0.4em]"
           >
             Designed & Developed by <span class="font-bold text-gray-500 group-hover:text-brand-gold">MTAHA</span>
           </a>
         </div>
       </div>
     </footer>
+
+    <script>
+      type CleanupFn = () => void;
+
+      declare global {
+        interface Window {
+          __layoutNavCleanup?: CleanupFn;
+          __layoutNavPageLoadBound?: boolean;
+        }
+      }
+
+      function initMobileNav() {
+        window.__layoutNavCleanup?.();
+
+        const menuButton = document.getElementById('mobile-menu-button') as HTMLButtonElement | null;
+        const mobileMenu = document.getElementById('mobile-menu');
+        const openIcon = document.getElementById('mobile-menu-open-icon');
+        const closeIcon = document.getElementById('mobile-menu-close-icon');
+        const menuLinks = Array.from(document.querySelectorAll<HTMLElement>('.mobile-menu-link'));
+
+        if (!menuButton || !mobileMenu) return;
+
+        let isOpen = false;
+        let menuAnimationTimeout: ReturnType<typeof setTimeout> | undefined;
+
+        mobileMenu.style.height = '0px';
+
+        const syncMenu = () => {
+          if (menuAnimationTimeout) clearTimeout(menuAnimationTimeout);
+
+          if (isOpen) {
+            menuLinks.forEach((link, index) => {
+              link.style.transitionDelay = `${index * 35}ms`;
+            });
+
+            mobileMenu.classList.remove('hidden', 'pointer-events-none', 'opacity-0', '-translate-y-1', 'border-transparent');
+            mobileMenu.classList.add('opacity-100', 'translate-y-0', 'border-white/5');
+
+            void mobileMenu.offsetHeight;
+            mobileMenu.style.height = `${mobileMenu.scrollHeight}px`;
+
+            requestAnimationFrame(() => {
+              menuLinks.forEach((link) => {
+                link.classList.remove('opacity-0', 'translate-y-1');
+                link.classList.add('opacity-100', 'translate-y-0');
+              });
+            });
+
+            menuAnimationTimeout = setTimeout(() => {
+              mobileMenu.style.height = 'auto';
+            }, 320);
+          } else {
+            menuLinks.forEach((link) => {
+              link.style.transitionDelay = '0ms';
+            });
+
+            mobileMenu.style.height = `${mobileMenu.scrollHeight}px`;
+            void mobileMenu.offsetHeight;
+
+            mobileMenu.classList.add('pointer-events-none', 'opacity-0', '-translate-y-1', 'border-transparent');
+            mobileMenu.classList.remove('opacity-100', 'translate-y-0', 'border-white/5');
+            mobileMenu.style.height = '0px';
+
+            menuLinks.forEach((link) => {
+              link.classList.add('opacity-0', 'translate-y-1');
+              link.classList.remove('opacity-100', 'translate-y-0');
+            });
+
+            menuAnimationTimeout = setTimeout(() => {
+              mobileMenu.classList.add('hidden');
+            }, 280);
+          }
+
+          openIcon?.classList.toggle('hidden', isOpen);
+          closeIcon?.classList.toggle('hidden', !isOpen);
+          menuButton.setAttribute('aria-expanded', String(isOpen));
+        };
+
+        const openMenu = () => {
+          isOpen = true;
+          syncMenu();
+        };
+
+        const closeMenu = () => {
+          isOpen = false;
+          syncMenu();
+        };
+
+        const onMenuButtonClick = () => {
+          if (isOpen) closeMenu();
+          else openMenu();
+        };
+
+        const onResize = () => {
+          if (window.innerWidth >= 768) closeMenu();
+        };
+
+        const onKeydown = (event: KeyboardEvent) => {
+          if (event.key === 'Escape') closeMenu();
+        };
+
+        const onDocumentClick = (event: MouseEvent) => {
+          if (!isOpen) return;
+          if (!(event.target instanceof Node)) return;
+          if (mobileMenu.contains(event.target) || menuButton.contains(event.target)) return;
+          closeMenu();
+        };
+
+        const onMenuLinkClick = () => {
+          closeMenu();
+        };
+
+        menuButton.addEventListener('click', onMenuButtonClick);
+        window.addEventListener('resize', onResize);
+        document.addEventListener('keydown', onKeydown);
+        document.addEventListener('click', onDocumentClick);
+        menuLinks.forEach((link) => link.addEventListener('click', onMenuLinkClick));
+
+        syncMenu();
+
+        window.__layoutNavCleanup = () => {
+          if (menuAnimationTimeout) clearTimeout(menuAnimationTimeout);
+          menuButton.removeEventListener('click', onMenuButtonClick);
+          window.removeEventListener('resize', onResize);
+          document.removeEventListener('keydown', onKeydown);
+          document.removeEventListener('click', onDocumentClick);
+          menuLinks.forEach((link) => link.removeEventListener('click', onMenuLinkClick));
+        };
+      }
+
+      if (!window.__layoutNavPageLoadBound) {
+        document.addEventListener('astro:page-load', initMobileNav);
+        window.__layoutNavPageLoadBound = true;
+      }
+
+      initMobileNav();
+    </script>
   </body>
 </html>
