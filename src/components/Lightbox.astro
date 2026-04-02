@@ -138,12 +138,12 @@
 
     const navigateNext = () => {
       currentIndex = (currentIndex + 1) % currentImages.length;
-      updateLightbox(1);
+      updateLightbox(-1);
     };
 
     const navigatePrev = () => {
       currentIndex = (currentIndex - 1 + currentImages.length) % currentImages.length;
-      updateLightbox(-1);
+      updateLightbox(1);
     };
 
     const onDocumentClick = (e: MouseEvent) => {

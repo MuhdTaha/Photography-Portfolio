@@ -76,6 +76,57 @@ const faqs = [
   </main>
 </Layout>
 
+<script>
+  type CleanupFn = () => void;
+
+  declare global {
+    interface Window {
+      __faqScrollCleanup?: CleanupFn;
+      __faqScrollBound?: boolean;
+    }
+  }
+
+  function initFaqScrollFocus() {
+    window.__faqScrollCleanup?.();
+
+    const faqInputs = Array.from(document.querySelectorAll<HTMLInputElement>('input[id^="faq-"]'));
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches; 
+
+    const onFaqToggle = (event: Event) => {
+      const target = event.currentTarget as HTMLInputElement;
+      if (!target.checked) return;
+
+      const faqCard = target.closest('.bg-card-dark');
+      if (!faqCard) return;
+
+      // Wait for expand animation to start, then center the opened item.
+      window.setTimeout(() => {
+        faqCard.scrollIntoView({
+          behavior: prefersReducedMotion ? 'auto' : 'smooth',
+          block: 'center'
+        });
+      }, 120);
+    };
+
+    faqInputs.forEach((input) => {
+      input.addEventListener('change', onFaqToggle);
+    });
+
+    window.__faqScrollCleanup = () => {
+      faqInputs.forEach((input) => {
+        input.removeEventListener('change', onFaqToggle);
+      });
+    };
+  }
+
+  if (!window.__faqScrollBound) {
+    document.addEventListener('astro:page-load', initFaqScrollFocus);
+    window.__faqScrollBound = true;
+  }
+
+  initFaqScrollFocus();
+</script>
+
 <style>
   /* 1. Target the text container inside the grid when the checkbox is checked */
   input:checked ~ div > div > div {
