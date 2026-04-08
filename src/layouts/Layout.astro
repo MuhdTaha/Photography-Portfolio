@@ -14,6 +14,8 @@ interface LayoutProps {
   ogImage?: string;
   noindex?: boolean;
   structuredData?: JsonLd | JsonLd[];
+  enableLightbox?: boolean;
+  enableClientRouter?: boolean;
 }
 
 const {
@@ -22,6 +24,8 @@ const {
   ogImage = siteData.hero_image,
   noindex = false,
   structuredData,
+  enableLightbox = true,
+  enableClientRouter = true,
 } = Astro.props as LayoutProps;
 
 const canonicalUrl = new URL(Astro.url.pathname, Astro.site ?? Astro.url).toString();
@@ -75,7 +79,7 @@ const structuredDataPayload = structuredData
       ))
     }
     <link rel="icon" type="image/png" href="/favicon.png" />
-    <ClientRouter />
+    {enableClientRouter && <ClientRouter />}
   </head>
   <body class="bg-obsidian text-white font-body selection:bg-brand-gold selection:text-black">
     <nav class="fixed top-0 z-50 w-full border-b border-white/5 bg-obsidian/80 backdrop-blur-md">
@@ -170,7 +174,7 @@ const structuredDataPayload = structuredData
     </nav>
 
     <slot />
-    <Lightbox />
+    {enableLightbox && <Lightbox />}
 
     <footer class="mt-10 border-t border-white/5 bg-card-dark py-7 sm:py-6">
       <div class="mx-auto max-w-7xl px-4 text-center sm:px-6">

@@ -4,7 +4,7 @@
 import Layout from '../layouts/Layout.astro';
 import Photo from '../components/Photo.astro';
 import { client } from '../lib/sanity';
-import { ALL_PHOTOS_QUERY } from '../utils/queries';
+import { CATEGORY_PHOTOS_QUERY } from '../utils/queries';
 import categoryData from '../data/category.json';
 
 type GalleryPhoto = {
@@ -13,6 +13,11 @@ type GalleryPhoto = {
   alt?: string;
   category?: string;
 };
+
+const categories = ['automotive', 'sports', 'portraits', 'nature'] as const;
+type CategorySlug = (typeof categories)[number];
+
+export const prerender = true;
 
 export async function getStaticPaths() {
   return [
@@ -24,21 +29,30 @@ export async function getStaticPaths() {
 }
 
 const { category } = Astro.params;
-const allPhotos = await client.fetch(ALL_PHOTOS_QUERY) as GalleryPhoto[];
+const normalizedCategory = category?.toLowerCase() ?? '';
+const isValidCategory = categories.includes(normalizedCategory as CategorySlug);
+
+if (!isValidCategory) {
+  Astro.response.status = 404;
+}
+
+const allPhotos = isValidCategory
+  ? (await client.fetch(CATEGORY_PHOTOS_QUERY, { category: normalizedCategory }) as GalleryPhoto[])
+  : [];
 
 // Logic for next category link
-const categories = ['automotive', 'sports', 'portraits', 'nature'];
-const currentIndex = categories.indexOf(category);
+const currentIndex = categories.indexOf(normalizedCategory as CategorySlug);
 const nextIndex = (currentIndex + 1) % categories.length; // Loop back to first category after the last one
 const nextCategory = categories[nextIndex];
 
-// Filter photos for this specific category
-const categoryPhotos = allPhotos.filter(
-  (p: GalleryPhoto) => p.category?.toLowerCase() === category.toLowerCase()
-);
+const categoryPhotos = allPhotos;
 
-const description = categoryData[category as keyof typeof categoryData];
-const displayTitle = category.charAt(0).toUpperCase() + category.slice(1);
+const description = isValidCategory
+  ? categoryData[normalizedCategory as keyof typeof categoryData]
+  : 'This gallery category does not exist.';
+const displayTitle = isValidCategory
+  ? normalizedCategory.charAt(0).toUpperCase() + normalizedCategory.slice(1)
+  : '404';
 const seoDescription = `${displayTitle} photography portfolio by Ali1_Visuals featuring curated ${displayTitle.toLowerCase()} sessions.`;
 ---
 
@@ -53,10 +67,12 @@ const seoDescription = `${displayTitle} photography portfolio by Ali1_Visuals fe
           <span class="inline-block leading-none">Back to Home</span>
         </a>
 
-        <a href={`/${nextCategory}`} class="group inline-flex items-center gap-2 rounded-sm px-3 py-2 text-[10px] font-bold uppercase leading-none tracking-[0.22em] text-gray-500 transition-colors hover:text-brand-gold sm:w-fit sm:px-0 sm:py-0 sm:tracking-[0.3em]">
-          <span class="inline-block leading-none">Next: {nextCategory}</span>
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 transition-transform group-hover:translate-x-1"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-        </a>
+        {isValidCategory && (
+          <a href={`/${nextCategory}`} class="group inline-flex items-center gap-2 rounded-sm px-3 py-2 text-[10px] font-bold uppercase leading-none tracking-[0.22em] text-gray-500 transition-colors hover:text-brand-gold sm:w-fit sm:px-0 sm:py-0 sm:tracking-[0.3em]">
+            <span class="inline-block leading-none">Next: {nextCategory}</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 transition-transform group-hover:translate-x-1"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+          </a>
+        )}
       </div>
 
       <header class="relative mb-12 sm:mb-16 md:mb-18">
@@ -68,7 +84,7 @@ const seoDescription = `${displayTitle} photography portfolio by Ali1_Visuals fe
 
         <div class="w-full border-t border-brand-gold/30 pt-5 text-center sm:pt-6">
           <p class="mb-4 text-[10px] font-black uppercase tracking-[0.24em] text-brand-gold sm:tracking-[0.4em]">
-            The Narrative
+            {isValidCategory ? 'The Narrative' : 'Page Not Found'}
           </p>
           
           <p class="w-full text-sm font-light italic leading-relaxed text-gray-400 md:text-base">
@@ -77,19 +93,28 @@ const seoDescription = `${displayTitle} photography portfolio by Ali1_Visuals fe
         </div>
       </header>
 
-      <div class="columns-1 gap-4 space-y-4 md:columns-2 lg:columns-3">
-        {categoryPhotos.map((photo: GalleryPhoto) => (
-          <Photo 
-            publicId={photo.publicId} 
-            title={photo.title} 
-            alt={photo.alt} 
-          />
-        ))}
-      </div>
+      {isValidCategory ? (
+        <>
+          <div class="columns-1 gap-4 space-y-4 md:columns-2 lg:columns-3">
+            {categoryPhotos.map((photo: GalleryPhoto, index: number) => (
+              <Photo 
+                publicId={photo.publicId} 
+                title={photo.title} 
+                alt={photo.alt}
+                priority={index < 2}
+              />
+            ))}
+          </div>
 
-      {categoryPhotos.length === 0 && (
+          {categoryPhotos.length === 0 && (
+            <div class="rounded-sm border border-white/5 bg-card-dark py-24 text-center sm:py-32 md:py-40">
+              <p class="text-[10px] uppercase tracking-[0.3em] text-gray-600 sm:tracking-[0.5em]">Collection Coming Soon</p>
+            </div>
+          )}
+        </>
+      ) : (
         <div class="rounded-sm border border-white/5 bg-card-dark py-24 text-center sm:py-32 md:py-40">
-          <p class="text-[10px] uppercase tracking-[0.3em] text-gray-600 sm:tracking-[0.5em]">Collection Coming Soon</p>
+          <p class="text-[10px] uppercase tracking-[0.3em] text-gray-600 sm:tracking-[0.5em]">The requested category does not exist.</p>
         </div>
       )}
     </div>

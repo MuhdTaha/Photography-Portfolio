@@ -2,7 +2,8 @@
 // src/components/Photo.astro
 
 const { publicId, alt, title } = Astro.props;
-const gridUrl = `https://res.cloudinary.com/${import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/f_auto,q_auto,w_800/${publicId}`;
+const { priority = false } = Astro.props;
+const gridUrl = `https://res.cloudinary.com/${import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/f_auto,q_auto:eco,dpr_auto,w_720,c_limit/${publicId}`;
 const fullUrl = `https://res.cloudinary.com/${import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/f_auto,q_auto,w_2000/${publicId}`;
 ---
 
@@ -14,7 +15,9 @@ const fullUrl = `https://res.cloudinary.com/${import.meta.env.PUBLIC_CLOUDINARY_
   <img 
     src={gridUrl} 
     alt={alt} 
-    loading="lazy" 
+    loading={priority ? 'eager' : 'lazy'}
+    fetchpriority={priority ? 'high' : 'auto'}
+    sizes="(max-width: 768px) 95vw, (max-width: 1024px) 48vw, 32vw"
     draggable="false"
     class="w-full h-auto transition-transform duration-700 group-hover:scale-105"
   />
