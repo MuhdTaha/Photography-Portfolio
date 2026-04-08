@@ -12,9 +12,26 @@ const faqs = [
   { q: faqData.faq_4, a: faqData.faq_4_ans },
   { q: faqData.faq_5, a: faqData.faq_5_ans },
 ];
+
+const faqStructuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faqs.map((faq) => ({
+    '@type': 'Question',
+    name: faq.q,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: faq.a.replace(/<[^>]+>/g, ''),
+    },
+  })),
+};
 ---
 
-<Layout title="FAQ | Ali1_Visuals">
+<Layout
+  title="FAQ | Ali1_Visuals"
+  description="Read common questions about booking, pricing, travel, and delivery for Ali1_Visuals photography sessions."
+  structuredData={faqStructuredData}
+>
   <main class="bg-obsidian">
     <div class="h-20 sm:h-24 md:h-28"></div>
 

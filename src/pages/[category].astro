@@ -39,9 +39,10 @@ const categoryPhotos = allPhotos.filter(
 
 const description = categoryData[category as keyof typeof categoryData];
 const displayTitle = category.charAt(0).toUpperCase() + category.slice(1);
+const seoDescription = `${displayTitle} photography portfolio by Ali1_Visuals featuring curated ${displayTitle.toLowerCase()} sessions.`;
 ---
 
-<Layout title={`${displayTitle} | Ali1_Visuals`}>
+<Layout title={`${displayTitle} | Ali1_Visuals`} description={seoDescription}>
   <main class="min-h-screen bg-obsidian">
     <div class="h-18 md:h-22"></div>
 
