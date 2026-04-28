@@ -18,8 +18,7 @@
   import { defineConfig, renderStudio } from 'sanity';
   import { deskTool } from 'sanity/desk';
   import { cloudinarySchemaPlugin } from 'sanity-plugin-cloudinary';
-
-  import photo from '../../../cms/schemaTypes/photo';
+  import { schemaTypes } from '../../../cms/schemaTypes';
 
   const config = defineConfig({
     projectId: import.meta.env.PUBLIC_SANITY_PROJECT_ID,
@@ -31,7 +30,7 @@
       cloudinarySchemaPlugin(),
     ],
     schema: {
-      types: [photo],
+      types: schemaTypes,
     },
   });
 

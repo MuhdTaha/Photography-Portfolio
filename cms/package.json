@@ -9,16 +9,18 @@
     "deploy": "sanity deploy",
     "deploy-graphql": "sanity graphql deploy",
     "dev": "sanity dev",
-    "start": "sanity start"
+    "start": "sanity start",
+    "migrate:photos:dry": "sanity exec --with-user-token scripts/migrate-photo-types.ts",
+    "migrate:photos": "sanity exec --with-user-token scripts/migrate-photo-types.ts -- --write"
   },
   "keywords": [
     "sanity"
   ],
   "dependencies": {
-    "@sanity/vision": "^5.18.0",
+    "@sanity/vision": "^5.22.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
-    "sanity": "^5.18.0",
+    "sanity": "^5.22.0",
     "sanity-plugin-cloudinary": "^1.4.1",
     "styled-components": "^6.1.18"
   },

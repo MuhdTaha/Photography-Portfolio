@@ -3,10 +3,9 @@ import { sanityClient } from "sanity:client";
 export const client = sanityClient;
 
 export async function getPhotos() {
-  // Sanity query to fetch photos with necessary fields
-  const query = `*[_type == "photo"] | order(order asc) {
+  const query = `*[_type in ["portraits", "nature", "automotive", "sports"]] | order(order asc) {
     title,
-    category,
+    "category": coalesce(category, _type),
     order,
     "publicId": image.public_id,
     "alt": title

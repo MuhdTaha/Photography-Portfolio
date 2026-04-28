@@ -9,6 +9,9 @@ export default defineConfig({
   site: process.env.PUBLIC_SITE_URL,
   output: 'server',
   adapter: vercel(),
+  devToolbar: {
+    enabled: false,
+  },
   integrations: [sanity(
     {
       projectId: 'sthyuhqk',
