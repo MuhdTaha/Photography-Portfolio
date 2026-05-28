@@ -17,9 +17,12 @@ export default {
     },
     {
       name: 'image',
-      type: 'cloudinary.asset', // This tells Sanity to use the Cloudinary picker
-      title: 'Cloudinary Image',
-      description: 'Upload or select your high-res photo from Cloudinary.'
+      type: 'image',
+      title: 'Photo',
+      description: 'Upload your high-res photo.',
+      options: {
+        hotspot: true,
+      },
     },
     {
       name: 'category',

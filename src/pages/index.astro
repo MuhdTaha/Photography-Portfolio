@@ -6,9 +6,11 @@ import Hero from '../components/Hero.astro';
 import { client } from '../lib/sanity';
 import { ALL_PHOTOS_QUERY } from '../utils/queries';
 import siteData from '../data/site.json';
+import { getImageUrl, getResponsiveImage } from '../utils/imageUrl';
+import type { SanityImageSource } from '../utils/imageUrl';
 
 type GalleryPhoto = {
-  publicId: string;
+  image: SanityImageSource;
   title: string;
   alt?: string;
   category?: string;
@@ -16,7 +18,6 @@ type GalleryPhoto = {
 
 const photos = await client.fetch(ALL_PHOTOS_QUERY) as GalleryPhoto[];
 const categories = ['Automotive', 'Sports', 'Portraits', 'Nature'];
-const cloudinaryCloudName = import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME;
 const categoryCopy = {
   automotive: 'Clean lines, motion, and the kind of frame that makes horsepower feel sculpted.',
   sports: 'Fast hands, sharp timing, and the split-second energy that turns a play into a story.',
@@ -25,13 +26,19 @@ const categoryCopy = {
 } satisfies Record<string, string>;
 type CategorySlug = keyof typeof categoryCopy;
 
-const getGridImageUrl = (publicId: string) => {
-  return `https://res.cloudinary.com/${cloudinaryCloudName}/image/upload/f_auto,q_auto:eco,dpr_auto,w_1100,c_fill/${publicId}`;
-};
+const getGridImage = (image: SanityImageSource) => getResponsiveImage(image, {
+  widths: [640, 960, 1100, 1400, 1800],
+  sizes: '(max-width: 1024px) 100vw, 60vw',
+  fit: 'max',
+});
 
-const getFullImageUrl = (publicId: string) => {
-  return `https://res.cloudinary.com/${cloudinaryCloudName}/image/upload/f_auto,q_auto,w_2000/${publicId}`;
-};
+const getSupportingImage = (image: SanityImageSource) => getResponsiveImage(image, {
+  widths: [480, 720, 960, 1200],
+  sizes: '(max-width: 1024px) 50vw, 25vw',
+  fit: 'max',
+});
+
+const getFullImageUrl = (image: SanityImageSource) => getImageUrl(image, { width: 2000, fit: 'max', quality: 85, format: 'auto' });
 ---
 
 <Layout
@@ -99,26 +106,36 @@ const getFullImageUrl = (publicId: string) => {
 
               <div class={`grid gap-2 p-2 sm:gap-3 sm:p-3 ${index % 2 === 1 ? 'lg:order-1 lg:grid-cols-[1.15fr_0.85fr]' : 'lg:order-2 lg:grid-cols-[0.85fr_1.15fr]'}`}>
                 {leadPhoto ? (
+                  (() => {
+                    const leadImage = getGridImage(leadPhoto.image);
+
+                    return (
                   <div
                     class="photo-trigger group/photo relative min-h-55 overflow-hidden rounded-sm bg-card-dark lg:min-h-full"
                     data-photo-card
-                    data-full-url={getFullImageUrl(leadPhoto.publicId)}
+                    data-full-url={getFullImageUrl(leadPhoto.image)}
                     data-title={leadPhoto.title}
                   >
-                    <img
-                      src={getGridImageUrl(leadPhoto.publicId)}
-                      alt={leadPhoto.alt ?? leadPhoto.title}
-                      loading={index === 0 ? 'eager' : 'lazy'}
-                      fetchpriority={index === 0 ? 'high' : 'auto'}
-                      sizes="(max-width: 1024px) 100vw, 60vw"
-                      draggable="false"
-                      class="h-full w-full object-cover"
-                      data-photo-image
-                    />
+                    <picture class="block h-full w-full">
+                      <source type="image/avif" srcset={leadImage.avifSrcSet} sizes={leadImage.sizes} />
+                      <source type="image/webp" srcset={leadImage.webpSrcSet} sizes={leadImage.sizes} />
+                      <img
+                        src={leadImage.src}
+                        alt={leadPhoto.alt ?? leadPhoto.title}
+                        loading={index === 0 ? 'eager' : 'lazy'}
+                        fetchpriority={index === 0 ? 'high' : 'auto'}
+                        sizes={leadImage.sizes}
+                        draggable="false"
+                        class="h-full w-full object-cover"
+                        data-photo-image
+                      />
+                    </picture>
 
                     <div class="absolute inset-0 bg-linear-to-t from-black/75 via-black/12 to-transparent opacity-90 transition-opacity duration-500 group-hover/photo:from-black/65" data-photo-overlay></div>
                     <div class="absolute inset-0 ring-0 ring-brand-gold/0 transition-all duration-500 group-hover/photo:ring-1 group-hover/photo:ring-brand-gold/25" data-photo-accent></div>
                   </div>
+                    );
+                  })()
                 ) : (
                   <div class="flex min-h-55 items-center justify-center rounded-sm border border-white/5 bg-black/25 px-6 text-center text-[10px] font-bold uppercase tracking-[0.35em] text-gray-600 lg:min-h-full">
                     More work coming soon
@@ -127,26 +144,36 @@ const getFullImageUrl = (publicId: string) => {
 
                 <div class="grid grid-cols-2 gap-2 lg:grid-cols-1 lg:grid-rows-2 lg:gap-3">
                   {supportingPhotos.map((photo) => (
+                    (() => {
+                      const supportingImage = getSupportingImage(photo.image);
+
+                      return (
                     <div
                       class="photo-trigger group/photo relative min-h-27 overflow-hidden rounded-sm bg-card-dark"
                       data-photo-card
-                      data-full-url={getFullImageUrl(photo.publicId)}
+                      data-full-url={getFullImageUrl(photo.image)}
                       data-title={photo.title}
                     >
-                      <img
-                        src={getGridImageUrl(photo.publicId)}
-                        alt={photo.alt ?? photo.title}
-                        loading="lazy"
-                        fetchpriority="auto"
-                        sizes="(max-width: 1024px) 50vw, 25vw"
-                        draggable="false"
-                        class="h-full w-full object-cover"
-                        data-photo-image
-                      />
+                      <picture class="block h-full w-full">
+                        <source type="image/avif" srcset={supportingImage.avifSrcSet} sizes={supportingImage.sizes} />
+                        <source type="image/webp" srcset={supportingImage.webpSrcSet} sizes={supportingImage.sizes} />
+                        <img
+                          src={supportingImage.src}
+                          alt={photo.alt ?? photo.title}
+                          loading="lazy"
+                          fetchpriority="auto"
+                          sizes={supportingImage.sizes}
+                          draggable="false"
+                          class="h-full w-full object-cover"
+                          data-photo-image
+                        />
+                      </picture>
 
                       <div class="absolute inset-0 bg-linear-to-t from-black/78 via-black/8 to-transparent opacity-85 transition-opacity duration-500 group-hover/photo:from-black/68" data-photo-overlay></div>
                       <div class="absolute inset-0 ring-0 ring-brand-gold/0 transition-all duration-500 group-hover/photo:ring-1 group-hover/photo:ring-brand-gold/25" data-photo-accent></div>
                     </div>
+                      );
+                    })()
                   ))}
 
                   {supportingPhotos.length < 2 && (

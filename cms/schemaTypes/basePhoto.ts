@@ -12,9 +12,12 @@ export const createPhotoSchema = (category: string, displayName: string) => ({
     },
     {
       name: 'image',
-      type: 'cloudinary.asset',
-      title: 'Cloudinary Image',
-      description: 'Upload or select your high-res photo from Cloudinary.'
+      type: 'image',
+      title: 'Photo',
+      description: 'Upload your high-res photo.',
+      options: {
+        hotspot: true,
+      },
     },
     {
       name: 'category',

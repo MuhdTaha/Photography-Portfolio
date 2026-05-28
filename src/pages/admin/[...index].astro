@@ -17,7 +17,6 @@
 <script>
   import { defineConfig, renderStudio } from 'sanity';
   import { deskTool } from 'sanity/desk';
-  import { cloudinarySchemaPlugin } from 'sanity-plugin-cloudinary';
   import { schemaTypes } from '../../../cms/schemaTypes';
 
   const config = defineConfig({
@@ -27,7 +26,6 @@
     basePath: '/admin', // This must match the folder name in src/pages
     plugins: [
       deskTool(),
-      cloudinarySchemaPlugin(),
     ],
     schema: {
       types: schemaTypes,

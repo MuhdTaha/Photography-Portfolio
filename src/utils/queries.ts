@@ -5,7 +5,7 @@ export const ALL_PHOTOS_QUERY = `*[_type in ${JSON.stringify(CATEGORY_TYPES)}] |
   title,
   "category": coalesce(category, _type),
   order,
-  "publicId": image.public_id,
+  image,
   "alt": title
 }`;
 
@@ -13,7 +13,7 @@ export const CATEGORY_PHOTOS_QUERY = `*[_type in ${JSON.stringify(CATEGORY_TYPES
   title,
   "category": coalesce(category, _type),
   order,
-  "publicId": image.public_id,
+  image,
   "alt": title,
   featured
 }`;

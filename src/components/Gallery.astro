@@ -3,13 +3,14 @@
 
 import { client } from '../lib/sanity';
 import { ALL_PHOTOS_QUERY } from '../utils/queries';
+import { getResponsiveImage } from '../utils/imageUrl';
+import type { SanityImageSource } from '../utils/imageUrl';
 
 type GalleryPhoto = {
   title: string;
   category: string;
   order: number;
-  imageUrl?: string;
-  publicId: string;
+  image: SanityImageSource;
   alt: string;
 };
 
@@ -21,12 +22,29 @@ const photos = await client.fetch<GalleryPhoto[]>(ALL_PHOTOS_QUERY);
     <div class="columns-1 gap-4 space-y-4 sm:columns-2 lg:columns-3">
       {photos.map((photo: GalleryPhoto) => (
         <div class="group relative cursor-crosshair overflow-hidden rounded-sm bg-card-dark transition-all duration-700 hover:ring-1 hover:ring-brand-gold/50" data-photo-card>
-          <img
-            src={`https://res.cloudinary.com/${import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/f_auto,q_auto,w_800/${photo.publicId}`}
-            alt={photo.alt}
-            class="w-full"
-            data-photo-image
-          />
+          <picture class="block w-full">
+            {(() => {
+              const responsiveImage = getResponsiveImage(photo.image, {
+                widths: [480, 800, 1200],
+                sizes: '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw',
+                fit: 'max',
+              });
+
+              return (
+                <>
+                  <source type="image/avif" srcset={responsiveImage.avifSrcSet} sizes={responsiveImage.sizes} />
+                  <source type="image/webp" srcset={responsiveImage.webpSrcSet} sizes={responsiveImage.sizes} />
+                  <img
+                    src={responsiveImage.src}
+                    alt={photo.alt}
+                    sizes={responsiveImage.sizes}
+                    class="w-full"
+                    data-photo-image
+                  />
+                </>
+              );
+            })()}
+          </picture>
           
           <div class="absolute inset-0 flex flex-col justify-end p-6 opacity-0" data-photo-overlay>
             <span class="text-[10px] font-bold tracking-widest text-brand-gold uppercase mb-1">

@@ -6,9 +6,10 @@ import Photo from '../components/Photo.astro';
 import { client } from '../lib/sanity';
 import { CATEGORY_PHOTOS_QUERY } from '../utils/queries';
 import categoryData from '../data/category.json';
+import type { SanityImageSource } from '../utils/imageUrl';
 
 type GalleryPhoto = {
-  publicId: string;
+  image: SanityImageSource;
   title: string;
   alt?: string;
   category?: string;
@@ -98,7 +99,7 @@ const seoDescription = `${displayTitle} photography portfolio by Ali1_Visuals fe
           <div class="columns-1 gap-4 space-y-4 md:columns-2 lg:columns-3">
             {categoryPhotos.map((photo: GalleryPhoto, index: number) => (
               <Photo 
-                publicId={photo.publicId} 
+                image={photo.image} 
                 title={photo.title} 
                 alt={photo.alt}
                 priority={index < 2}
