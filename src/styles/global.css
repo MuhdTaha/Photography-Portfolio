@@ -21,3 +21,42 @@
 ::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-track { background: var(--color-obsidian); }
 ::-webkit-scrollbar-thumb { background: var(--color-brand-gold); }
+
+[data-photo-card] {
+  transition: transform 500ms ease, border-color 500ms ease, background-color 500ms ease, box-shadow 500ms ease;
+}
+
+[data-photo-card]:hover,
+[data-photo-card][data-in-view="true"] {
+  border-color: rgba(197, 160, 89, 0.55);
+  background-color: rgba(197, 160, 89, 0.08);
+  box-shadow: 0 0 0 1px rgba(197, 160, 89, 0.18), 0 18px 45px rgba(0, 0, 0, 0.32);
+}
+
+[data-photo-card] [data-photo-image] {
+  transition: transform 700ms ease, filter 700ms ease, opacity 700ms ease;
+}
+
+[data-photo-card]:hover [data-photo-image],
+[data-photo-card][data-in-view="true"] [data-photo-image] {
+  transform: scale(1.1);
+  filter: brightness(1.12) saturate(1.15);
+}
+
+[data-photo-card] [data-photo-overlay] {
+  transition: opacity 500ms ease, background-color 500ms ease;
+}
+
+[data-photo-card]:hover [data-photo-overlay],
+[data-photo-card][data-in-view="true"] [data-photo-overlay] {
+  opacity: 1;
+}
+
+[data-photo-card] [data-photo-accent] {
+  transition: opacity 500ms ease, border-color 500ms ease, box-shadow 500ms ease;
+}
+
+[data-photo-card]:hover [data-photo-accent],
+[data-photo-card][data-in-view="true"] [data-photo-accent] {
+  opacity: 1;
+}

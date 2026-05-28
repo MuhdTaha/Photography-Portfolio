@@ -101,6 +101,7 @@ const getFullImageUrl = (publicId: string) => {
                 {leadPhoto ? (
                   <div
                     class="photo-trigger group/photo relative min-h-55 overflow-hidden rounded-sm bg-card-dark lg:min-h-full"
+                    data-photo-card
                     data-full-url={getFullImageUrl(leadPhoto.publicId)}
                     data-title={leadPhoto.title}
                   >
@@ -111,11 +112,12 @@ const getFullImageUrl = (publicId: string) => {
                       fetchpriority={index === 0 ? 'high' : 'auto'}
                       sizes="(max-width: 1024px) 100vw, 60vw"
                       draggable="false"
-                      class="h-full w-full object-cover transition-all duration-700 group-hover/photo:scale-110 group-hover/photo:brightness-110 group-hover/photo:saturate-110"
+                      class="h-full w-full object-cover"
+                      data-photo-image
                     />
 
-                    <div class="absolute inset-0 bg-linear-to-t from-black/75 via-black/12 to-transparent opacity-90 transition-opacity duration-500 group-hover/photo:opacity-100 group-hover/photo:from-black/65"></div>
-                    <div class="absolute inset-0 ring-0 ring-brand-gold/0 transition-all duration-500 group-hover/photo:ring-1 group-hover/photo:ring-brand-gold/25"></div>
+                    <div class="absolute inset-0 bg-linear-to-t from-black/75 via-black/12 to-transparent opacity-90 transition-opacity duration-500 group-hover/photo:from-black/65" data-photo-overlay></div>
+                    <div class="absolute inset-0 ring-0 ring-brand-gold/0 transition-all duration-500 group-hover/photo:ring-1 group-hover/photo:ring-brand-gold/25" data-photo-accent></div>
                   </div>
                 ) : (
                   <div class="flex min-h-55 items-center justify-center rounded-sm border border-white/5 bg-black/25 px-6 text-center text-[10px] font-bold uppercase tracking-[0.35em] text-gray-600 lg:min-h-full">
@@ -127,6 +129,7 @@ const getFullImageUrl = (publicId: string) => {
                   {supportingPhotos.map((photo) => (
                     <div
                       class="photo-trigger group/photo relative min-h-27 overflow-hidden rounded-sm bg-card-dark"
+                      data-photo-card
                       data-full-url={getFullImageUrl(photo.publicId)}
                       data-title={photo.title}
                     >
@@ -137,11 +140,12 @@ const getFullImageUrl = (publicId: string) => {
                         fetchpriority="auto"
                         sizes="(max-width: 1024px) 50vw, 25vw"
                         draggable="false"
-                        class="h-full w-full object-cover transition-all duration-700 group-hover/photo:scale-110 group-hover/photo:brightness-110 group-hover/photo:saturate-110"
+                        class="h-full w-full object-cover"
+                        data-photo-image
                       />
 
-                      <div class="absolute inset-0 bg-linear-to-t from-black/78 via-black/8 to-transparent opacity-85 transition-opacity duration-500 group-hover/photo:opacity-100 group-hover/photo:from-black/68"></div>
-                      <div class="absolute inset-0 ring-0 ring-brand-gold/0 transition-all duration-500 group-hover/photo:ring-1 group-hover/photo:ring-brand-gold/25"></div>
+                      <div class="absolute inset-0 bg-linear-to-t from-black/78 via-black/8 to-transparent opacity-85 transition-opacity duration-500 group-hover/photo:from-black/68" data-photo-overlay></div>
+                      <div class="absolute inset-0 ring-0 ring-brand-gold/0 transition-all duration-500 group-hover/photo:ring-1 group-hover/photo:ring-brand-gold/25" data-photo-accent></div>
                     </div>
                   ))}
 

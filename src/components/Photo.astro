@@ -9,6 +9,7 @@ const fullUrl = `https://res.cloudinary.com/${import.meta.env.PUBLIC_CLOUDINARY_
 
 <div 
   class="photo-trigger group relative overflow-hidden rounded-md bg-card-dark border border-white/5 mb-4 break-inside-avoid cursor-pointer"
+  data-photo-card
   data-full-url={fullUrl}
   data-title={title}
 >
@@ -19,10 +20,11 @@ const fullUrl = `https://res.cloudinary.com/${import.meta.env.PUBLIC_CLOUDINARY_
     fetchpriority={priority ? 'high' : 'auto'}
     sizes="(max-width: 768px) 95vw, (max-width: 1024px) 48vw, 32vw"
     draggable="false"
-    class="w-full h-auto transition-transform duration-700 group-hover:scale-105"
+    class="w-full h-auto"
+    data-photo-image
   />
   
-  <div class="absolute inset-0 flex items-end bg-linear-to-t from-black/90 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 p-6">
+  <div class="absolute inset-0 flex items-end bg-linear-to-t from-black/90 via-black/10 to-transparent opacity-0 p-6" data-photo-overlay>
     <p class="text-white font-display text-[10px] uppercase tracking-widest leading-none">
       {title}
     </p>

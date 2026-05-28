@@ -1,32 +1,32 @@
 ---
 // src/components/Lightbox.astro
 ---
-<div id="lightbox" class="fixed inset-0 z-[100] hidden opacity-0 scale-[0.99] bg-black/95 backdrop-blur-sm items-center justify-center cursor-default select-none transition-[opacity,transform] duration-300 ease-out">
+<div id="lightbox" class="fixed inset-0 z-100 hidden opacity-0 scale-[0.99] bg-black/95 backdrop-blur-sm items-center justify-center cursor-default select-none transition-[opacity,transform] duration-300 ease-out">
   
-  <div id="lightbox-loader" class="absolute inset-0 flex items-center justify-center hidden">
+  <div id="lightbox-loader" class="absolute inset-0 grid place-items-center" hidden>
     <div class="h-10 w-10 animate-spin rounded-full border-2 border-brand-gold/20 border-t-brand-gold"></div>
   </div>
 
-  <button id="close-lightbox" class="absolute top-6 right-6 p-4 text-white/50 hover:text-brand-gold transition-colors z-[110] cursor-pointer">
+  <button id="close-lightbox" class="absolute top-6 right-6 z-110 cursor-pointer p-4 text-white/50 transition-colors hover:text-brand-gold">
     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
   </button>
 
-  <button id="prev-photo" class="absolute left-0 top-0 bottom-0 w-[15%] flex items-center justify-center text-white/20 hover:text-brand-gold hover:bg-gradient-to-r hover:from-black/40 to-transparent transition-all z-[105] cursor-pointer group">
+  <button id="prev-photo" class="group absolute bottom-0 left-0 top-0 z-105 flex w-[15%] cursor-pointer items-center justify-center to-transparent text-white/20 transition-all hover:bg-linear-to-r hover:from-black/40 hover:text-brand-gold">
     <svg class="group-hover:-translate-x-1 transition-transform" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
   </button>
   
-  <button id="next-photo" class="absolute right-0 top-0 bottom-0 w-[15%] flex items-center justify-center text-white/20 hover:text-brand-gold hover:bg-gradient-to-l hover:from-black/40 to-transparent transition-all z-[105] cursor-pointer group">
+  <button id="next-photo" class="group absolute bottom-0 right-0 top-0 z-105 flex w-[15%] cursor-pointer items-center justify-center to-transparent text-white/20 transition-all hover:bg-linear-to-l hover:from-black/40 hover:text-brand-gold">
     <svg class="group-hover:translate-x-1 transition-transform" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
   </button>
 
-  <div class="relative w-full h-full max-h-[100dvh] max-w-[100vw] flex flex-col items-center justify-center p-4 md:p-16">
+  <div class="relative flex h-full max-h-dvh w-full max-w-[100vw] flex-col items-center justify-center p-4 md:p-16">
     <div class="relative flex items-center justify-center w-full h-full pointer-events-none">
       <img 
         id="lightbox-img" 
         src="" 
         alt="" 
         draggable="false"
-        class="max-w-full max-h-full w-auto h-auto object-contain shadow-2xl transition-opacity duration-300 pointer-events-auto select-none z-[110]"
+        class="z-110 pointer-events-auto max-h-full max-w-full select-none object-contain shadow-2xl transition-opacity duration-300 w-auto h-auto"
       />
     </div>
     <p id="lightbox-caption" class="pointer-events-none absolute bottom-6 left-1/2 w-full max-w-3xl -translate-x-1/2 px-4 text-center font-display text-[10px] uppercase tracking-[0.4em] text-white/50"></p>
@@ -53,6 +53,7 @@
     const closeBtn = document.getElementById('close-lightbox');
     const prevBtn = document.getElementById('prev-photo');
     const nextBtn = document.getElementById('next-photo');
+    const isTouchDevice = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
 
     let currentImages: string[] = [];
     let currentCaptions: string[] = [];
@@ -61,7 +62,29 @@
     let closeTimeout: ReturnType<typeof setTimeout> | undefined;
     let touchStartX = 0;
     let touchEndX = 0;
+    let photoHoverObserver: IntersectionObserver | undefined;
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    const initPhotoHoverReveal = () => {
+      if (!isTouchDevice) return;
+
+      const photoCards = Array.from(document.querySelectorAll<HTMLElement>('[data-photo-card]'));
+      if (!photoCards.length) return;
+
+      photoHoverObserver = new IntersectionObserver((entries) => {
+        for (const entry of entries) {
+          entry.target.setAttribute('data-in-view', entry.isIntersecting ? 'true' : 'false');
+        }
+      }, {
+        threshold: [0.35, 0.5, 0.75],
+        rootMargin: '0px 0px -10% 0px',
+      });
+
+      for (const card of photoCards) {
+        card.setAttribute('data-in-view', 'false');
+        photoHoverObserver.observe(card);
+      }
+    };
 
     const preloadNextImage = () => {
       if (!currentImages.length) return;
@@ -74,7 +97,9 @@
       if (!lightboxImg || !currentImages.length) return;
 
       if (loaderTimeout) clearTimeout(loaderTimeout);
-      loaderTimeout = setTimeout(() => loader?.classList.remove('hidden'), 300);
+      loaderTimeout = setTimeout(() => {
+        if (loader) loader.hidden = false;
+      }, 300);
 
       const applyImage = () => {
         lightboxImg.src = currentImages[currentIndex];
@@ -100,7 +125,7 @@
 
       lightboxImg.onload = () => {
         if (loaderTimeout) clearTimeout(loaderTimeout);
-        loader?.classList.add('hidden');
+        if (loader) loader.hidden = true;
 
         if (!prefersReducedMotion) {
           const fromX = direction === 0 ? 0 : direction * -22;
@@ -134,6 +159,7 @@
 
       document.body.style.overflow = 'auto';
       if (loaderTimeout) clearTimeout(loaderTimeout);
+      if (loader) loader.hidden = true;
     };
 
     const navigateNext = () => {
@@ -220,6 +246,8 @@
     lightbox?.addEventListener('touchstart', onTouchStart, { passive: true });
     lightbox?.addEventListener('touchend', onTouchEnd, { passive: true });
 
+    initPhotoHoverReveal();
+
     window.__lightboxCleanup = () => {
       document.removeEventListener('click', onDocumentClick);
       document.removeEventListener('keydown', onKeydown);
@@ -229,7 +257,9 @@
       prevBtn?.removeEventListener('click', onPrevClick);
       lightbox?.removeEventListener('touchstart', onTouchStart);
       lightbox?.removeEventListener('touchend', onTouchEnd);
+      photoHoverObserver?.disconnect();
       if (closeTimeout) clearTimeout(closeTimeout);
+      if (loader) loader.hidden = true;
     };
   }
 
