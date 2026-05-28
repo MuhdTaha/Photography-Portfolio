@@ -5,10 +5,10 @@ import siteData from '../data/site.json';
 ---
 <section class="relative flex h-[80vh] items-center justify-center overflow-hidden bg-obsidian">
   <div class="absolute inset-0 z-0">
-    <div class="absolute inset-0 bg-gradient-to-b from-obsidian/20 via-obsidian/60 to-obsidian z-10"></div>
+    <div class="absolute inset-0 bg-linear-to-b from-obsidian/20 via-obsidian/60 to-obsidian z-10"></div>
     <img 
       src=  {siteData.hero_image} 
-      class="h-full w-full object-cover grayscale-[20%]" 
+      class="h-full w-full object-cover grayscale-20"
       alt="Cinematic Automotive Photography"
       loading="eager"
       fetchpriority="high"
@@ -20,7 +20,7 @@ import siteData from '../data/site.json';
       Not Just Photos — Visual Impact
     </h2>
     <h1 class="max-w-4xl font-display text-5xl md:text-7xl font-black text-white leading-tight uppercase">
-      Capturing the <span class="text-transparent bg-clip-text bg-gradient-to-r from-white via-brand-gold to-white">Rhythm of Motion</span>
+      <span class="text-transparent bg-clip-text bg-linear-to-r from-white via-brand-gold to-white">High-velocity motion and human emotion.</span>
     </h1>
   </div>
 </section>

@@ -3,7 +3,6 @@
 
 import Layout from '../layouts/Layout.astro';
 import Hero from '../components/Hero.astro';
-import Photo from '../components/Photo.astro';
 import { client } from '../lib/sanity';
 import { ALL_PHOTOS_QUERY } from '../utils/queries';
 import siteData from '../data/site.json';
@@ -11,11 +10,28 @@ import siteData from '../data/site.json';
 type GalleryPhoto = {
   publicId: string;
   title: string;
+  alt?: string;
   category?: string;
 };
 
 const photos = await client.fetch(ALL_PHOTOS_QUERY) as GalleryPhoto[];
 const categories = ['Automotive', 'Sports', 'Portraits', 'Nature'];
+const cloudinaryCloudName = import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME;
+const categoryCopy = {
+  automotive: 'Clean lines, motion, and the kind of frame that makes horsepower feel sculpted.',
+  sports: 'Fast hands, sharp timing, and the split-second energy that turns a play into a story.',
+  portraits: 'Confident, honest, and shaped around the personality that lives just under the surface.',
+  nature: 'Quiet light, wide air, and the details that make the outdoors feel cinematic.',
+} satisfies Record<string, string>;
+type CategorySlug = keyof typeof categoryCopy;
+
+const getGridImageUrl = (publicId: string) => {
+  return `https://res.cloudinary.com/${cloudinaryCloudName}/image/upload/f_auto,q_auto:eco,dpr_auto,w_1100,c_fill/${publicId}`;
+};
+
+const getFullImageUrl = (publicId: string) => {
+  return `https://res.cloudinary.com/${cloudinaryCloudName}/image/upload/f_auto,q_auto,w_2000/${publicId}`;
+};
 ---
 
 <Layout
@@ -25,46 +41,121 @@ const categories = ['Automotive', 'Sports', 'Portraits', 'Nature'];
   <main class="bg-obsidian">
     <Hero />
 
-    <section class="mx-auto w-full max-w-3xl px-5 py-14 text-center sm:px-6 md:py-22">
-      <h1 class="mb-4 font-display text-[9px] font-bold uppercase tracking-[0.28em] text-brand-gold sm:mb-6 sm:text-[10px] sm:tracking-[0.5em]">The Vision</h1>
-      <p class="text-base font-light leading-relaxed text-gray-300 italic sm:text-xl md:text-2xl">
+    <section class="mx-auto w-full max-w-2xl px-5 py-10 text-center sm:px-6 sm:py-12 md:py-14">
+      <h1 class="mb-3 font-display text-[9px] font-bold uppercase tracking-[0.3em] text-brand-gold sm:text-[10px] sm:tracking-[0.5em]">The Vision</h1>
+      <p class="text-sm font-light leading-relaxed text-gray-300 italic sm:text-lg md:text-xl">
         "{siteData.home_text}"
       </p>
     </section>
 
-    {categories.map((cat) => {
-      // Filter photos for this specific category
-      const categoryPhotos = photos.filter((p: GalleryPhoto) => p.category?.toLowerCase() === cat.toLowerCase()).slice(0, 4);
-      
-      return (
-        <section class="mb-20 sm:mb-24 md:mb-32">
-          <div class="mx-auto mb-7 flex w-full max-w-7xl items-center gap-3 px-4 sm:mb-8 sm:gap-4 sm:px-6 md:mb-10">
-            <a href={`/${cat.toLowerCase()}`} class="group relative flex items-center gap-2 pb-2 transition-all hover:opacity-80 sm:gap-4">
-              <h2 class="font-display text-2xl font-black uppercase tracking-tight italic transition-colors group-hover:text-brand-gold sm:text-3xl">
-                {cat}
-              </h2>
-      
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 -translate-x-1 text-brand-gold opacity-100 transition-all sm:h-6 sm:w-6 sm:-translate-x-2 sm:opacity-0 sm:group-hover:translate-x-0 sm:group-hover:opacity-100">
-                <line x1="5" y1="12" x2="19" y2="12"></line>
-                <polyline points="12 5 19 12 12 19"></polyline>
-              </svg>
-              <span class="absolute bottom-0 left-0 h-0.5 w-0 bg-brand-gold transition-all duration-300 group-hover:w-full"></span>
-            </a>
-            <div class="h-px flex-1 bg-linear-to-r from-brand-gold/40 to-transparent"></div>
-          </div>
-          
-          <div class="mx-auto max-w-7xl columns-2 gap-4 space-y-4 px-4 sm:px-6 md:columns-3">
-            {categoryPhotos.map((photo: GalleryPhoto) => (
-              <div class="break-inside-avoid"> <Photo 
-                  publicId={photo.publicId} 
-                  title={photo.title} 
-                  category={photo.category} 
-                />
+    <div class="mx-auto flex w-full max-w-7xl flex-col gap-3 px-3 pb-4 sm:px-4 sm:pb-6 lg:px-6">
+      {categories.map((cat, index) => {
+        const categorySlug = cat.toLowerCase() as CategorySlug;
+        const categoryPhotos = photos.filter((photo: GalleryPhoto) => photo.category?.toLowerCase() === categorySlug).slice(0, 3);
+        const leadPhoto = categoryPhotos[0];
+        const supportingPhotos = categoryPhotos.slice(1, 3);
+        const categoryText = categoryCopy[categorySlug];
+        const bandTone = index % 2 === 0
+          ? 'bg-linear-to-r from-white/[0.03] via-brand-gold/8 to-white/[0.01]'
+          : 'bg-linear-to-r from-white/[0.01] via-brand-gold/8 to-white/[0.03]';
+
+        return (
+          <section class={`group relative overflow-hidden border-y border-white/5 ${bandTone}`}>
+            <div class={`grid min-h-65 items-stretch transition-transform duration-500 group-hover:scale-[1.01] lg:min-h-80 ${index % 2 === 1 ? 'lg:grid-cols-[1.25fr_0.95fr]' : 'lg:grid-cols-[0.95fr_1.25fr]'}`}>
+              <div class={`relative z-10 flex flex-col justify-between gap-5 p-5 sm:p-6 lg:p-8 ${index % 2 === 1 ? 'lg:order-2' : 'lg:order-1'}`}>
+                <div class={`flex items-center gap-3 text-[10px] font-bold uppercase tracking-[0.36em] text-brand-gold/80 sm:tracking-[0.45em] ${index % 2 === 1 ? 'justify-end flex-row-reverse self-end' : ''}`}>
+                  <span class={`h-px w-10 bg-brand-gold/50 transition-all duration-500 group-hover:w-14 group-hover:bg-brand-gold ${index % 2 === 1 ? 'order-2' : ''}`}></span>
+                  <span class="transition-transform duration-500 group-hover:scale-110">{String(index + 1).padStart(2, '0')}</span>
+                </div>
+
+                <div class={`max-w-xl ${index % 2 === 1 ? 'ml-auto text-right' : ''}`}>
+                  <a href={`/${categorySlug}`} class={`group/link inline-flex items-center gap-3 ${index % 2 === 1 ? 'flex-row-reverse justify-end' : ''}`}>
+                    <h2 class={`relative inline-block pb-1 font-display text-4xl font-black uppercase italic leading-[0.85] tracking-tight text-white transition-all duration-500 after:absolute after:-bottom-0.5 after:h-px after:w-full after:bg-brand-light-gold after:transition-transform after:duration-700 after:ease-out group-hover/link:scale-[1.03] group-hover/link:text-brand-gold group-hover/link:after:scale-x-100 sm:text-5xl lg:text-6xl ${index % 2 === 1 ? 'text-right after:right-0 after:origin-right after:left-auto' : 'after:left-0 after:origin-left'} after:scale-x-0`}>
+                      {cat}
+                    </h2>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class={`translate-y-1 text-brand-gold transition-transform duration-500 group-hover/link:scale-125 ${index % 2 === 1 ? 'group-hover/link:-translate-x-2' : 'group-hover/link:translate-x-2'}`}>
+                      {index % 2 === 1 ? (
+                        <>
+                          <line x1="19" y1="12" x2="5" y2="12"></line>
+                          <polyline points="12 5 5 12 12 19"></polyline>
+                        </>
+                      ) : (
+                        <>
+                          <line x1="5" y1="12" x2="19" y2="12"></line>
+                          <polyline points="12 5 19 12 12 19"></polyline>
+                        </>
+                      )}
+                    </svg>
+                  </a>
+                  <p class="mt-3 max-w-md text-sm leading-relaxed text-gray-300 sm:text-base">
+                    {categoryText}
+                  </p>
+                </div>
+
+                <a href={`/${categorySlug}`} class={`group/cta inline-flex items-center gap-3 text-[10px] font-bold uppercase tracking-[0.32em] text-gray-500 transition-colors hover:text-brand-gold sm:tracking-[0.4em] ${index % 2 === 1 ? 'justify-end self-end text-right' : 'w-fit'}`}>
+                  <span>View collection</span>
+                </a>
               </div>
-            ))}
-          </div>
-        </section>
-      )
-    })}
+
+              <div class={`grid gap-2 p-2 sm:gap-3 sm:p-3 ${index % 2 === 1 ? 'lg:order-1 lg:grid-cols-[1.15fr_0.85fr]' : 'lg:order-2 lg:grid-cols-[0.85fr_1.15fr]'}`}>
+                {leadPhoto ? (
+                  <div
+                    class="photo-trigger group/photo relative min-h-55 overflow-hidden rounded-sm bg-card-dark lg:min-h-full"
+                    data-full-url={getFullImageUrl(leadPhoto.publicId)}
+                    data-title={leadPhoto.title}
+                  >
+                    <img
+                      src={getGridImageUrl(leadPhoto.publicId)}
+                      alt={leadPhoto.alt ?? leadPhoto.title}
+                      loading={index === 0 ? 'eager' : 'lazy'}
+                      fetchpriority={index === 0 ? 'high' : 'auto'}
+                      sizes="(max-width: 1024px) 100vw, 60vw"
+                      draggable="false"
+                      class="h-full w-full object-cover transition-all duration-700 group-hover/photo:scale-110 group-hover/photo:brightness-110 group-hover/photo:saturate-110"
+                    />
+
+                    <div class="absolute inset-0 bg-linear-to-t from-black/75 via-black/12 to-transparent opacity-90 transition-opacity duration-500 group-hover/photo:opacity-100 group-hover/photo:from-black/65"></div>
+                    <div class="absolute inset-0 ring-0 ring-brand-gold/0 transition-all duration-500 group-hover/photo:ring-1 group-hover/photo:ring-brand-gold/25"></div>
+                  </div>
+                ) : (
+                  <div class="flex min-h-55 items-center justify-center rounded-sm border border-white/5 bg-black/25 px-6 text-center text-[10px] font-bold uppercase tracking-[0.35em] text-gray-600 lg:min-h-full">
+                    More work coming soon
+                  </div>
+                )}
+
+                <div class="grid grid-cols-2 gap-2 lg:grid-cols-1 lg:grid-rows-2 lg:gap-3">
+                  {supportingPhotos.map((photo) => (
+                    <div
+                      class="photo-trigger group/photo relative min-h-27 overflow-hidden rounded-sm bg-card-dark"
+                      data-full-url={getFullImageUrl(photo.publicId)}
+                      data-title={photo.title}
+                    >
+                      <img
+                        src={getGridImageUrl(photo.publicId)}
+                        alt={photo.alt ?? photo.title}
+                        loading="lazy"
+                        fetchpriority="auto"
+                        sizes="(max-width: 1024px) 50vw, 25vw"
+                        draggable="false"
+                        class="h-full w-full object-cover transition-all duration-700 group-hover/photo:scale-110 group-hover/photo:brightness-110 group-hover/photo:saturate-110"
+                      />
+
+                      <div class="absolute inset-0 bg-linear-to-t from-black/78 via-black/8 to-transparent opacity-85 transition-opacity duration-500 group-hover/photo:opacity-100 group-hover/photo:from-black/68"></div>
+                      <div class="absolute inset-0 ring-0 ring-brand-gold/0 transition-all duration-500 group-hover/photo:ring-1 group-hover/photo:ring-brand-gold/25"></div>
+                    </div>
+                  ))}
+
+                  {supportingPhotos.length < 2 && (
+                    <div class="flex min-h-27 items-center justify-center rounded-sm border border-white/5 bg-black/20 text-[9px] font-bold uppercase tracking-[0.35em] text-gray-600 lg:min-h-0">
+                      Select works
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </section>
+        );
+      })}
+    </div>
   </main>
 </Layout>
