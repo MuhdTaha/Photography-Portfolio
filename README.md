@@ -4,6 +4,15 @@ A high-performance, editorial-grade photography portfolio built for **Asad Alibh
 
 ---
 
+## Tech Stack
+* **Framework:** Astro 5.0 (Server-side Rendering)
+* **CMS:** Sanity.io (Headless)
+* **Media:** Cloudinary (Dynamic CDN)
+* **Styling:** Tailwind CSS 4
+* **Deployment:** Vercel
+
+---
+
 ## Performance Snapshot
 Optimized for the modern web, achieving near-instant load times through strategic asset management.
 
@@ -48,15 +57,6 @@ The styling follows a strict "Utility-First" approach using **Tailwind 4**.
 ### 3. SEO-Driven Metadata
 * **Dynamic Meta Tags:** Every category page generates unique OpenGraph and meta descriptions to improve search visibility.
 * **Semantic HTML:** Strict adherence to semantic tags ensures a perfect score in Lighthouse Accessibility and Best Practices.
-
----
-
-## Tech Stack
-* **Framework:** Astro 5.0 (Server-side Rendering)
-* **CMS:** Sanity.io (Headless)
-* **Media:** Cloudinary (Dynamic CDN)
-* **Styling:** Tailwind CSS 4
-* **Deployment:** Vercel
 
 ---
 
