@@ -9,7 +9,7 @@ export const ALL_PHOTOS_QUERY = `*[_type in ${JSON.stringify(CATEGORY_TYPES)}] |
   "alt": title
 }`;
 
-export const CATEGORY_PHOTOS_QUERY = `*[_type in ${JSON.stringify(CATEGORY_TYPES)} && lower(coalesce(category, _type)) == $category] | order(order asc) {
+export const CATEGORY_PHOTOS_QUERY = `*[_type in ${JSON.stringify(CATEGORY_TYPES)} && lower(coalesce(category, _type)) == $category] | order(lower(title) asc, order asc) {
   title,
   "category": coalesce(category, _type),
   order,

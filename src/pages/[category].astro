@@ -20,6 +20,15 @@ type CategorySlug = (typeof categories)[number];
 
 export const prerender = true;
 
+const LEGACY_CATEGORY_PHOTOS_QUERY = `*[_type == "photo" && lower(coalesce(category, _type)) == $category] | order(lower(title) asc, order asc) {
+  title,
+  "category": coalesce(category, _type),
+  order,
+  image,
+  "alt": title,
+  featured
+}`;
+
 export async function getStaticPaths() {
   return [
     { params: { category: 'automotive' } },
@@ -33,20 +42,28 @@ const { category } = Astro.params;
 const normalizedCategory = category?.toLowerCase() ?? '';
 const isValidCategory = categories.includes(normalizedCategory as CategorySlug);
 
+async function fetchCategoryPhotos(category: string) {
+  const categoryPhotos = await client.fetch<GalleryPhoto[]>(CATEGORY_PHOTOS_QUERY, { category });
+
+  if (categoryPhotos.length > 0) {
+    return categoryPhotos;
+  }
+
+  return await client.fetch<GalleryPhoto[]>(LEGACY_CATEGORY_PHOTOS_QUERY, { category });
+}
+
 if (!isValidCategory) {
   Astro.response.status = 404;
 }
 
-const allPhotos = isValidCategory
-  ? (await client.fetch(CATEGORY_PHOTOS_QUERY, { category: normalizedCategory }) as GalleryPhoto[])
+const categoryPhotos = isValidCategory
+  ? await fetchCategoryPhotos(normalizedCategory)
   : [];
 
 // Logic for next category link
 const currentIndex = categories.indexOf(normalizedCategory as CategorySlug);
 const nextIndex = (currentIndex + 1) % categories.length; // Loop back to first category after the last one
 const nextCategory = categories[nextIndex];
-
-const categoryPhotos = allPhotos;
 
 const description = isValidCategory
   ? categoryData[normalizedCategory as keyof typeof categoryData]
