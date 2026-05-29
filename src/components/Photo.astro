@@ -1,4 +1,6 @@
 ---
+// src/components/Photo.astro
+
 import { getImageUrl, getResponsiveImage } from '../utils/imageUrl';
 import type { SanityImageSource } from '../utils/imageUrl';
 
@@ -9,22 +11,24 @@ const { image, alt, title, priority = false } = Astro.props as {
   priority?: boolean;
 };
 
+// We change the Sanity image builder strategy from 'max' to 'crop' 
+// to match our clean grid boundaries perfectly at the server level.
 const gridImage = getResponsiveImage(image, {
   widths: [360, 540, 720, 960, 1200],
   sizes: '(max-width: 768px) 95vw, (max-width: 1024px) 48vw, 32vw',
-  fit: 'max',
+  fit: 'crop', 
 });
 
 const fullUrl = getImageUrl(image, { width: 2000, fit: 'max', quality: 85, format: 'auto' });
 ---
 
 <div 
-  class="photo-trigger group relative mb-4 break-inside-avoid cursor-pointer overflow-hidden rounded-md border border-white/5 bg-card-dark"
+  class="photo-trigger group relative aspect-[3/2] w-full cursor-pointer overflow-hidden rounded-md border border-white/5 bg-card-dark transition-all duration-500 hover:border-brand-gold/20 shadow-lg"
   data-photo-card
   data-full-url={fullUrl}
   data-title={title}
 >
-  <picture class="block h-full w-full">
+  <picture class="absolute inset-0 block h-full w-full">
     <source type="image/avif" srcset={gridImage.avifSrcSet} sizes={gridImage.sizes} />
     <source type="image/webp" srcset={gridImage.webpSrcSet} sizes={gridImage.sizes} />
     <img 
@@ -34,13 +38,14 @@ const fullUrl = getImageUrl(image, { width: 2000, fit: 'max', quality: 85, forma
       fetchpriority={priority ? 'high' : 'auto'}
       sizes={gridImage.sizes}
       draggable="false"
-      class="h-auto w-full"
+      class="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-103"
       data-photo-image
     />
   </picture>
   
-  <div class="absolute inset-0 flex items-end bg-linear-to-t from-black/90 via-black/10 to-transparent opacity-0 p-6" data-photo-overlay>
-    <p class="font-display text-[10px] leading-none uppercase tracking-widest text-white">
+  {/* Elegant overlay interaction matched to your brand style */}
+  <div class="absolute inset-0 bg-linear-to-t from-black/80 via-black/10 to-transparent p-5 opacity-0 transition-opacity duration-500 ease-out group-hover:opacity-100 flex items-end" data-photo-overlay>
+    <p class="font-display text-[10px] font-bold uppercase tracking-[0.25em] text-white translate-y-2 transition-transform duration-500 ease-out group-hover:translate-y-0">
       {title}
     </p>
   </div>
