@@ -7,7 +7,7 @@ A high-performance, editorial-grade photography portfolio built for **Asad Alibh
 ## Tech Stack
 * **Framework:** Astro 5.0 (Server-side Rendering)
 * **CMS:** Sanity.io (Headless)
-* **Media:** Cloudinary (Dynamic CDN)
+* **Media:** Sanity for gallery photography, Cloudinary for misc assets like the logo, hero imagery, and supporting graphics
 * **Styling:** Tailwind CSS 4
 * **Deployment:** Vercel
 
@@ -26,15 +26,17 @@ Optimized for the modern web, achieving near-instant load times through strategi
 
 ## Innovative Features
 
-### Cloudinary-Powered Asset Pipeline
-The website utilizes a sophisticated Cloudinary integration to handle high-resolution raw assets without compromising performance.
-* **Auto-Optimization:** Every image is served in modern **WebP/AVIF** formats via `f_auto` and `q_auto`.
-* **Dynamic Resizing:** Images are dynamically scaled to match the user's viewport, preventing the delivery of over-sized files.
-* **Fetch Prioritization:** Critical hero assets use `fetchpriority="high"` to ensure the "Largest Contentful Paint" happens as early as possible.
+### Split Asset Pipeline
+The media pipeline is intentionally split between two systems.
+* **Sanity for large gallery uploads:** Full photography uploads live in Sanity and are transformed on demand through the shared image helper.
+* **Cloudinary for misc assets:** Logo files, hero imagery, and other small site graphics still use Cloudinary for convenient CDN delivery.
+* **Auto-Optimization:** Images are still served in modern **WebP/AVIF** formats with responsive sizing where it matters.
+* **Fetch Prioritization:** Critical hero assets continue to use `fetchpriority="high"` to help the Largest Contentful Paint happen early.
 
 ### Headless CMS & Sanity Admin Page
 Designed as a "Data Coordinator" for the photographer, the custom Sanity Admin panel allows for effortless gallery updates.
-* **Sanity + Cloudinary Sync:** Asad can browse his Cloudinary library directly within Sanity, picking photos and assigning categories like "Automotive" or "Sports".
+* **Sanity Gallery Storage:** Asad uploads and manages the main gallery images directly in Sanity, then assigns categories like "Automotive" or "Sports".
+* **Cloudinary for Supporting Assets:** Smaller site-specific assets remain in Cloudinary and are handled separately from the main photo library.
 * **On-Demand Rendering:** Built with `output: 'server'`, the site reflects CMS changes instantly without requiring a code redeploy.
 
 ### Liquid UX & Custom Lightbox
@@ -101,7 +103,7 @@ This workflow is used to add or update gallery images from the Sanity Admin Page
 2. Create a new photo document or open an existing one.
 3. Set **Photo Title** (used for display and alt text).
 4. Set **Display Order** (lower numbers appear first).
-5. Select a **Cloudinary Image** using the Cloudinary picker.
+5. Upload the full-resolution image into the Sanity image field.
 6. Choose a **Category**: portraits, nature, automotive, or sports.
 7. Toggle **Featured on Homepage?** as needed.
 8. Publish the document.
@@ -110,6 +112,7 @@ This workflow is used to add or update gallery images from the Sanity Admin Page
 Notes:
 
 * Category pages are generated from CMS data, and records are fetched in ascending `order`.
+* Cloudinary remains available for non-gallery assets such as the logo, hero image, and other supporting graphics.
 * Because the site runs with server output, published CMS changes are reflected without a full redeploy.
 
 ---

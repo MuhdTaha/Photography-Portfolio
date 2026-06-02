@@ -4,7 +4,7 @@
 import Layout from '../layouts/Layout.astro';
 import Hero from '../components/Hero.astro';
 import { client } from '../lib/sanity';
-import { ALL_PHOTOS_QUERY } from '../utils/queries';
+import { HOMEPAGE_PHOTOS_QUERY } from '../utils/queries';
 import siteData from '../data/site.json';
 import { getImageUrl, getResponsiveImage } from '../utils/imageUrl';
 import type { SanityImageSource } from '../utils/imageUrl';
@@ -16,7 +16,8 @@ type GalleryPhoto = {
   category?: string;
 };
 
-const photos = await client.fetch(ALL_PHOTOS_QUERY) as GalleryPhoto[];
+type HomepagePhotos = Record<CategorySlug, GalleryPhoto[]>;
+
 const categories = ['Automotive', 'Sports', 'Portraits', 'Nature'];
 const categoryCopy = {
   automotive: 'Clean lines, motion, and the kind of frame that makes horsepower feel sculpted.',
@@ -25,6 +26,8 @@ const categoryCopy = {
   nature: 'Quiet light, wide air, and the details that make the outdoors feel cinematic.',
 } satisfies Record<string, string>;
 type CategorySlug = keyof typeof categoryCopy;
+
+const photosByCategory = await client.fetch<HomepagePhotos>(HOMEPAGE_PHOTOS_QUERY);
 
 const getGridImage = (image: SanityImageSource) => getResponsiveImage(image, {
   widths: [640, 960, 1100, 1400, 1800],
@@ -58,7 +61,7 @@ const getFullImageUrl = (image: SanityImageSource) => getImageUrl(image, { width
     <div class="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 pb-12 sm:px-6 lg:px-8">
       {categories.map((cat, index) => {
         const categorySlug = cat.toLowerCase() as CategorySlug;
-        const categoryPhotos = photos.filter((photo: GalleryPhoto) => photo.category?.toLowerCase() === categorySlug).slice(0, 3);
+        const categoryPhotos = photosByCategory[categorySlug] ?? [];
         const leadPhoto = categoryPhotos[0];
         const supportingPhotos = categoryPhotos.slice(1, 3);
         const categoryText = categoryCopy[categorySlug];
@@ -70,7 +73,7 @@ const getFullImageUrl = (image: SanityImageSource) => getImageUrl(image, { width
           <section class={`group relative overflow-hidden rounded-md border border-white/5 p-4 transition-all duration-500 hover:border-brand-gold/40 hover:shadow-[0_0_32px_rgba(212,175,55,0.18)] sm:p-6 lg:p-8 ${bandTone}`}>
             <div class={`mb-4 flex lg:hidden ${index % 2 === 0 ? 'justify-end' : 'justify-start'}`}>
               <div class={`flex items-center gap-3 text-[10px] font-bold uppercase tracking-[0.36em] text-brand-gold/80 sm:tracking-[0.45em]`}>
-                <span class={`h-[2px] w-12 bg-brand-gold/30 transition-all duration-500 group-hover:w-16 group-hover:bg-brand-gold ${index % 2 === 0 ? 'order-2' : ''}`}></span>
+                <span class={`h-0.5 w-12 bg-brand-gold/30 transition-all duration-500 group-hover:w-16 group-hover:bg-brand-gold ${index % 2 === 0 ? 'order-2' : ''}`}></span>
                 <span class="font-mono text-[11px] font-semibold tracking-[0.42em] transition-transform duration-500 group-hover:scale-110 sm:text-[12px]">{String(index + 1).padStart(2, '0')}</span>
               </div>
             </div>
@@ -80,7 +83,7 @@ const getFullImageUrl = (image: SanityImageSource) => getImageUrl(image, { width
               {/* Text Information Column */}
               <div class={`relative z-10 flex flex-col justify-center gap-6 ${index % 2 === 1 ? 'items-end text-right lg:order-2' : 'lg:order-1'}`}>
                 <div class={`hidden lg:flex items-center gap-3 text-[10px] font-bold uppercase tracking-[0.36em] text-brand-gold/80 sm:tracking-[0.45em] ${index % 2 === 1 ? 'w-full justify-end flex-row-reverse' : ''}`}>
-                  <span class={`h-[2px] w-12 bg-brand-gold/30 transition-all duration-500 group-hover:w-16 group-hover:bg-brand-gold ${index % 2 === 1 ? 'order-2' : ''}`}></span>
+                  <span class={`h-0.5 w-12 bg-brand-gold/30 transition-all duration-500 group-hover:w-16 group-hover:bg-brand-gold ${index % 2 === 1 ? 'order-2' : ''}`}></span>
                   <span class="font-mono text-[11px] font-semibold tracking-[0.42em] transition-transform duration-500 group-hover:scale-110 sm:text-[12px]">{String(index + 1).padStart(2, '0')}</span>
                 </div>
 
@@ -120,7 +123,7 @@ const getFullImageUrl = (image: SanityImageSource) => getImageUrl(image, { width
                     const leadImage = getGridImage(leadPhoto.image);
                     return (
                       <div
-                        class="photo-trigger group/photo relative aspect-[2/3] w-full overflow-hidden rounded-sm bg-card-dark shadow-xl"
+                        class="photo-trigger group/photo relative aspect-2/3 w-full overflow-hidden rounded-sm bg-card-dark shadow-xl"
                         data-photo-card
                         data-full-url={getFullImageUrl(leadPhoto.image)}
                         data-title={leadPhoto.title}
@@ -135,24 +138,24 @@ const getFullImageUrl = (image: SanityImageSource) => getImageUrl(image, { width
                             fetchpriority={index === 0 ? 'high' : 'auto'}
                             sizes={leadImage.sizes}
                             draggable="false"
-                            class="h-full w-full object-cover transition-transform duration-700 group-hover/photo:scale-102"
+                            class="h-full w-full object-cover will-change-transform transition-transform duration-1000 ease-out group-hover/photo:scale-102"
                             data-photo-image
                           />
                         </picture>
-                        <div class="absolute inset-0 bg-linear-to-t from-black/60 via-black/5 to-transparent opacity-90 transition-opacity duration-500 group-hover/photo:opacity-75" data-photo-overlay></div>
-                        <div class="absolute inset-0 ring-1 ring-white/5 transition-all duration-500 group-hover/photo:ring-brand-gold/30" data-photo-accent></div>
+                        <div class="absolute inset-0 bg-linear-to-t from-black/60 via-black/5 to-transparent opacity-90 transition-opacity duration-1000 ease-out group-hover/photo:opacity-75" data-photo-overlay></div>
+                        <div class="absolute inset-0 ring-1 ring-white/5 transition-all duration-1000 ease-out group-hover/photo:ring-brand-gold/30" data-photo-accent></div>
                       </div>
                     );
                   })()
                 ) : (
-                  <div class="flex aspect-[2/3] items-center justify-center rounded-sm border border-white/5 bg-black/25 px-6 text-center text-[10px] font-bold uppercase tracking-[0.35em] text-gray-600">
+                  <div class="flex aspect-2/3 items-center justify-center rounded-sm border border-white/5 bg-black/25 px-6 text-center text-[10px] font-bold uppercase tracking-[0.35em] text-gray-600">
                     More work coming soon
                   </div>
                 )}
 
                 {/* Supporting Images Column Stack */}
                 <div class="grid grid-rows-2 gap-3 sm:gap-4">
-                  {supportingPhotos.map((photo) => (
+                  {supportingPhotos.map((photo: GalleryPhoto) => (
                     (() => {
                       const supportingImage = getSupportingImage(photo.image);
                       return (
@@ -172,12 +175,12 @@ const getFullImageUrl = (image: SanityImageSource) => getImageUrl(image, { width
                               fetchpriority="auto"
                               sizes={supportingImage.sizes}
                               draggable="false"
-                              class="h-full w-full object-cover transition-transform duration-700 group-hover/photo:scale-102"
+                              class="h-full w-full object-cover will-change-transform transition-transform duration-1000 ease-out group-hover/photo:scale-102"
                               data-photo-image
                             />
                           </picture>
-                          <div class="absolute inset-0 bg-linear-to-t from-black/60 via-black/5 to-transparent opacity-90 transition-opacity duration-500 group-hover/photo:opacity-75" data-photo-overlay></div>
-                          <div class="absolute inset-0 ring-1 ring-white/5 transition-all duration-500 group-hover/photo:ring-brand-gold/30" data-photo-accent></div>
+                          <div class="absolute inset-0 bg-linear-to-t from-black/60 via-black/5 to-transparent opacity-90 transition-opacity duration-1000 ease-out group-hover/photo:opacity-75" data-photo-overlay></div>
+                          <div class="absolute inset-0 ring-1 ring-white/5 transition-all duration-1000 ease-out group-hover/photo:ring-brand-gold/30" data-photo-accent></div>
                         </div>
                       );
                     })()

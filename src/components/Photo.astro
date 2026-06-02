@@ -37,13 +37,13 @@ const fullUrl = getImageUrl(image, { width: 2000, fit: 'max', quality: 85, forma
       fetchpriority={priority ? 'high' : 'auto'}
       sizes={gridImage.sizes}
       draggable="false"
-      class="h-auto w-full transition-transform duration-700 ease-out group-hover:scale-103"
+      class="h-auto w-full will-change-transform transition-transform duration-1000 ease-out group-hover:scale-103"
       data-photo-image
     />
   </picture>
   
-  <div class="absolute inset-0 bg-linear-to-t from-black/80 via-black/10 to-transparent p-5 opacity-0 transition-opacity duration-500 ease-out group-hover:opacity-100 flex items-end" data-photo-overlay>
-    <p class="font-display text-[10px] font-bold uppercase tracking-[0.25em] text-white translate-y-2 transition-transform duration-500 ease-out group-hover:translate-y-0">
+  <div class="absolute inset-0 flex items-end bg-linear-to-t from-black/80 via-black/10 to-transparent p-5 opacity-0 transition-opacity duration-1000 ease-out group-hover:opacity-100" data-photo-overlay>
+    <p class="font-display translate-y-2 text-[10px] font-bold uppercase tracking-[0.25em] text-white transition-transform duration-1000 ease-out group-hover:translate-y-0">
       {title}
     </p>
   </div>

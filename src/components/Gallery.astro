@@ -38,7 +38,7 @@ const photos = await client.fetch<GalleryPhoto[]>(ALL_PHOTOS_QUERY);
                     src={responsiveImage.src}
                     alt={photo.alt}
                     sizes={responsiveImage.sizes}
-                    class="w-full"
+                    class="w-full will-change-transform transition-transform duration-1000 ease-out group-hover:scale-103"
                     data-photo-image
                   />
                 </>
@@ -46,7 +46,7 @@ const photos = await client.fetch<GalleryPhoto[]>(ALL_PHOTOS_QUERY);
             })()}
           </picture>
           
-          <div class="absolute inset-0 flex flex-col justify-end p-6 opacity-0" data-photo-overlay>
+          <div class="absolute inset-0 flex flex-col justify-end p-6 opacity-0 transition-opacity duration-1000 ease-out group-hover:opacity-100" data-photo-overlay>
             <span class="text-[10px] font-bold tracking-widest text-brand-gold uppercase mb-1">
               {photo.category}
             </span>
