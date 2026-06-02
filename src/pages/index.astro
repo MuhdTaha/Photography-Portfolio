@@ -67,14 +67,21 @@ const getFullImageUrl = (image: SanityImageSource) => getImageUrl(image, { width
           : 'bg-linear-to-r from-white/[0.01] via-brand-gold/[0.03] to-white/[0.02]';
 
         return (
-          <section class={`group relative overflow-hidden rounded-md border border-white/5 p-4 sm:p-6 lg:p-8 ${bandTone}`}>
+          <section class={`group relative overflow-hidden rounded-md border border-white/5 p-4 transition-all duration-500 hover:border-brand-gold/40 hover:shadow-[0_0_32px_rgba(212,175,55,0.18)] sm:p-6 lg:p-8 ${bandTone}`}>
+            <div class={`mb-4 flex lg:hidden ${index % 2 === 0 ? 'justify-end' : 'justify-start'}`}>
+              <div class={`flex items-center gap-3 text-[10px] font-bold uppercase tracking-[0.36em] text-brand-gold/80 sm:tracking-[0.45em]`}>
+                <span class={`h-[2px] w-12 bg-brand-gold/30 transition-all duration-500 group-hover:w-16 group-hover:bg-brand-gold ${index % 2 === 0 ? 'order-2' : ''}`}></span>
+                <span class="font-mono text-[11px] font-semibold tracking-[0.42em] transition-transform duration-500 group-hover:scale-110 sm:text-[12px]">{String(index + 1).padStart(2, '0')}</span>
+              </div>
+            </div>
+
             <div class="grid items-center gap-8 lg:grid-cols-2">
               
               {/* Text Information Column */}
-              <div class={`flex flex-col justify-center gap-6 ${index % 2 === 1 ? 'lg:order-2 lg:text-right' : 'lg:order-1'}`}>
-                <div class={`flex items-center gap-3 text-[10px] font-bold uppercase tracking-[0.36em] text-brand-gold/80 sm:tracking-[0.45em] ${index % 2 === 1 ? 'justify-end flex-row-reverse' : ''}`}>
-                  <span class={`h-px w-10 bg-brand-gold/30 transition-all duration-500 group-hover:w-14 group-hover:bg-brand-gold ${index % 2 === 1 ? 'order-2' : ''}`}></span>
-                  <span class="transition-transform duration-500 group-hover:scale-110">{String(index + 1).padStart(2, '0')}</span>
+              <div class={`relative z-10 flex flex-col justify-center gap-6 ${index % 2 === 1 ? 'items-end text-right lg:order-2' : 'lg:order-1'}`}>
+                <div class={`hidden lg:flex items-center gap-3 text-[10px] font-bold uppercase tracking-[0.36em] text-brand-gold/80 sm:tracking-[0.45em] ${index % 2 === 1 ? 'w-full justify-end flex-row-reverse' : ''}`}>
+                  <span class={`h-[2px] w-12 bg-brand-gold/30 transition-all duration-500 group-hover:w-16 group-hover:bg-brand-gold ${index % 2 === 1 ? 'order-2' : ''}`}></span>
+                  <span class="font-mono text-[11px] font-semibold tracking-[0.42em] transition-transform duration-500 group-hover:scale-110 sm:text-[12px]">{String(index + 1).padStart(2, '0')}</span>
                 </div>
 
                 <div class="space-y-3">
@@ -82,7 +89,7 @@ const getFullImageUrl = (image: SanityImageSource) => getImageUrl(image, { width
                     <h2 class="font-display text-4xl font-black uppercase italic tracking-tight text-white transition-all duration-500 group-hover/link:text-brand-gold sm:text-5xl lg:text-6xl">
                       {cat}
                     </h2>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class={`text-brand-gold transition-transform duration-500 group-hover/link:scale-110 ${index % 2 === 1 ? 'group-hover/link:-translate-x-1' : 'group-hover/link:translate-x-1'}`}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class={`text-brand-gold transition-transform duration-500 group-hover/link:scale-110 ${index % 2 === 1 ? 'group-hover/link:-translate-x-1 mr-8' : 'group-hover/link:translate-x-1 ml-4'}`}>
                       {index % 2 === 1 ? (
                         <>
                           <line x1="19" y1="12" x2="5" y2="12"></line>
@@ -96,13 +103,13 @@ const getFullImageUrl = (image: SanityImageSource) => getImageUrl(image, { width
                       )}
                     </svg>
                   </a>
-                  <p class={`text-sm leading-relaxed text-gray-400 sm:text-base max-w-md ${index % 2 === 1 ? 'ml-auto' : ''}`}>
+                  <p class={`text-sm leading-relaxed text-gray-400 sm:text-base max-w-md ${index % 2 === 1 ? 'ml-auto text-right' : ''}`}>
                     {categoryText}
                   </p>
                 </div>
 
                 <a href={`/${categorySlug}`} class={`group/cta text-[10px] font-bold uppercase tracking-[0.32em] text-gray-500 transition-colors hover:text-brand-gold sm:tracking-[0.4em] ${index % 2 === 1 ? 'self-end' : 'w-fit'}`}>
-                  <span>View collection &rarr;</span>
+                  <span>View collection</span>
                 </a>
               </div>
 
@@ -190,6 +197,9 @@ const getFullImageUrl = (image: SanityImageSource) => getImageUrl(image, { width
 
               </div>
             </div>
+
+            
+
           </section>
         );
       })}
