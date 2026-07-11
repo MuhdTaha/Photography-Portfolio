@@ -1,0 +1,568 @@
+---
+// src/components/HomeSplit.astro
+// Split-screen category gate — desktop rail + mobile scroll carousel
+
+import { homeCategories, type HomeCategorySlug } from '../data/homeCategories';
+import { getResponsiveImage } from '../utils/imageUrl';
+import type { SanityImageSource } from '../utils/imageUrl';
+
+type GalleryPhoto = {
+  image: SanityImageSource;
+  title: string;
+  alt?: string;
+  category?: string;
+};
+
+interface Props {
+  photosByCategory: Record<HomeCategorySlug, GalleryPhoto[]>;
+}
+
+const { photosByCategory } = Astro.props;
+
+const panels = homeCategories.map((cat) => {
+  const leadPhoto = (photosByCategory[cat.slug] ?? [])[0] ?? null;
+  const image = leadPhoto
+    ? getResponsiveImage(leadPhoto.image, {
+        widths: [720, 960, 1200, 1600, 2000],
+        sizes: '(max-width: 1024px) 88vw, 68vw',
+        fit: 'max',
+      })
+    : null;
+
+  return { ...cat, leadPhoto, image };
+});
+
+const defaultSlug = panels[0]?.slug ?? 'automotive';
+const totalPanels = String(panels.length).padStart(2, '0');
+---
+
+<section class="w-full pb-14 lg:pb-16">
+  {/* Mobile: scrollable category window */}
+  <div class="home-split-mobile lg:hidden" data-active-slug={defaultSlug}>
+    <div class="mb-3 flex items-end justify-between gap-3 px-1">
+      <div>
+        <p class="text-[9px] font-bold uppercase tracking-[0.35em] text-brand-gold">Collections</p>
+        <p class="mt-1 flex items-center gap-2 text-[11px] uppercase tracking-[0.22em] text-gray-500">
+          <span class="home-split-swipe-hint inline-flex items-center gap-1.5 text-gray-400">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="home-split-swipe-icon" aria-hidden="true">
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+            Swipe
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="home-split-swipe-icon" aria-hidden="true">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </span>
+        </p>
+      </div>
+      <p class="font-mono text-[11px] tracking-[0.28em] text-brand-gold/80">
+        <span id="home-split-mobile-index">01</span>
+        <span class="text-gray-600"> / {totalPanels}</span>
+      </p>
+    </div>
+
+    <div class="relative">
+      <div class="pointer-events-none absolute inset-y-0 left-0 z-10 w-6 bg-linear-to-r from-obsidian to-transparent"></div>
+      <div class="pointer-events-none absolute inset-y-0 right-0 z-10 w-8 bg-linear-to-l from-obsidian to-transparent"></div>
+
+      <div
+        id="home-split-carousel"
+        class="home-split-carousel flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        aria-label="Scroll through collections"
+      >
+        {panels.map((panel, index) => (
+          <article
+            class:list={['home-split-slide', 'relative', 'shrink-0', 'snap-center', 'overflow-hidden', 'rounded-sm', 'border', 'border-white/10', 'bg-card-dark', index === 0 && 'is-active']}
+            data-slug={panel.slug}
+            data-index={index}
+            aria-label={`${panel.name} collection`}
+          >
+            <div class="relative aspect-[3/4] w-[min(78vw,22rem)] overflow-hidden sm:aspect-[4/5] sm:w-[min(70vw,26rem)]">
+              {panel.image && panel.leadPhoto ? (
+                <picture class="absolute inset-0 block h-full w-full">
+                  <source type="image/avif" srcset={panel.image.avifSrcSet} sizes={panel.image.sizes} />
+                  <source type="image/webp" srcset={panel.image.webpSrcSet} sizes={panel.image.sizes} />
+                  <img
+                    src={panel.image.src}
+                    alt={panel.leadPhoto.alt ?? panel.leadPhoto.title}
+                    loading={index === 0 ? 'eager' : 'lazy'}
+                    fetchpriority={index === 0 ? 'high' : 'auto'}
+                    sizes={panel.image.sizes}
+                    draggable="false"
+                    class:list={[
+                      'h-full w-full object-cover transition-transform duration-700',
+                      panel.orientation === 'portrait' ? 'object-[center_18%]' : 'object-center',
+                    ]}
+                  />
+                </picture>
+              ) : (
+                <div class="absolute inset-0 bg-linear-to-br from-white/[0.04] via-brand-gold/[0.07] to-black"></div>
+              )}
+
+              <div class="absolute inset-0 bg-linear-to-t from-obsidian via-obsidian/35 to-transparent"></div>
+
+              <div class="absolute inset-x-0 bottom-0 z-10 p-4 sm:p-5">
+                <p class="mb-1 font-mono text-[9px] tracking-[0.35em] text-brand-gold/80">{String(index + 1).padStart(2, '0')}</p>
+                <h3 class="font-display text-2xl font-black uppercase italic tracking-tight text-white sm:text-3xl">{panel.name}</h3>
+                <p class="mt-2 text-xs leading-relaxed text-gray-300 sm:text-sm">{panel.tagline}</p>
+                <a
+                  href={`/${panel.slug}`}
+                  class="mt-4 inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.32em] text-brand-gold transition-colors hover:text-brand-light-gold"
+                >
+                  View collection
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                    <polyline points="12 5 19 12 12 19"></polyline>
+                  </svg>
+                </a>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+
+    <div class="mt-4 flex items-center justify-center gap-2" role="tablist" aria-label="Collection position">
+      {panels.map((panel, index) => (
+        <button
+          type="button"
+          class:list={['home-split-dot', index === 0 && 'is-active']}
+          data-index={index}
+          aria-label={`Go to ${panel.name}`}
+          aria-current={index === 0 ? 'true' : 'false'}
+        ></button>
+      ))}
+    </div>
+  </div>
+
+  {/* Desktop: rail + stage */}
+  <div
+    class="home-split-gate hidden overflow-hidden rounded-sm border border-white/5 bg-card-dark lg:grid lg:grid-cols-[minmax(220px,30%)_1fr]"
+    data-active-slug={defaultSlug}
+  >
+    <div class="home-split-stage-wrap relative z-10 min-h-[min(78vh,820px)] lg:col-start-2 lg:row-start-1">
+      {panels.map((panel, index) => (
+        <div
+          class:list={['home-split-stage', index === 0 && 'is-active']}
+          data-stage={panel.slug}
+          data-orientation={panel.orientation}
+          aria-hidden={index === 0 ? 'false' : 'true'}
+        >
+          {panel.image && panel.leadPhoto ? (
+            <picture class="absolute inset-0 block h-full w-full">
+              <source type="image/avif" srcset={panel.image.avifSrcSet} sizes={panel.image.sizes} />
+              <source type="image/webp" srcset={panel.image.webpSrcSet} sizes={panel.image.sizes} />
+              <img
+                src={panel.image.src}
+                alt={panel.leadPhoto.alt ?? panel.leadPhoto.title}
+                loading={index === 0 ? 'eager' : 'lazy'}
+                fetchpriority={index === 0 ? 'high' : 'auto'}
+                sizes={panel.image.sizes}
+                draggable="false"
+                class:list={[
+                  'home-split-stage-image h-full w-full object-cover',
+                  panel.orientation === 'portrait' ? 'object-[center_18%]' : 'object-center',
+                ]}
+              />
+            </picture>
+          ) : (
+            <div class="absolute inset-0 bg-linear-to-br from-white/[0.04] via-brand-gold/[0.07] to-black"></div>
+          )}
+
+          <div class="absolute inset-0 bg-linear-to-t from-obsidian via-obsidian/40 to-transparent"></div>
+        </div>
+      ))}
+
+      <div class="pointer-events-none absolute inset-x-0 bottom-0 z-20">
+        {panels.map((panel, index) => (
+          <a
+            href={`/${panel.slug}`}
+            class:list={['home-split-cta', index === 0 && 'is-active']}
+            data-cta={panel.slug}
+            tabindex={index === 0 ? 0 : -1}
+          >
+            <p class="mb-2 text-[10px] font-bold uppercase tracking-[0.35em] text-brand-gold">View collection</p>
+            <p class="font-display text-4xl font-black uppercase italic tracking-tight text-white lg:text-5xl">{panel.name}</p>
+            <p class="mt-3 max-w-lg text-sm leading-relaxed text-gray-300 lg:text-base">{panel.copy}</p>
+          </a>
+        ))}
+      </div>
+    </div>
+
+    <nav
+      class="relative z-20 flex h-full flex-col border-r border-white/5 bg-obsidian lg:col-start-1 lg:row-start-1"
+      aria-label="Photography collections"
+    >
+      <div class="flex min-h-0 flex-1 flex-col" role="listbox" aria-label="Category previews">
+        {panels.map((panel, index) => (
+          <button
+            type="button"
+            class:list={['home-split-link', index === 0 && 'is-active']}
+            data-slug={panel.slug}
+            role="option"
+            aria-selected={index === 0 ? 'true' : 'false'}
+          >
+            <span class="home-split-indicator" aria-hidden="true"></span>
+            <span class="home-split-index">{String(index + 1).padStart(2, '0')}</span>
+            <span class="home-split-label">
+              <span class="home-split-name">{panel.name}</span>
+              <span class="home-split-meta">{panel.tagline}</span>
+            </span>
+          </button>
+        ))}
+      </div>
+    </nav>
+  </div>
+</section>
+
+<script>
+  declare global {
+    interface Window {
+      __homeSplitCleanup?: () => void;
+      __homeSplitPageLoadBound?: boolean;
+    }
+  }
+
+  function initHomeSplitGate() {
+    window.__homeSplitCleanup?.();
+
+    const cleanups: Array<() => void> = [];
+
+    // Desktop rail + stage
+    const gate = document.querySelector('.home-split-gate');
+    if (gate) {
+      const activate = (slug: string | null) => {
+        if (!slug) return;
+        gate.setAttribute('data-active-slug', slug);
+
+        gate.querySelectorAll('.home-split-link').forEach((link) => {
+          const active = link.getAttribute('data-slug') === slug;
+          link.classList.toggle('is-active', active);
+          link.setAttribute('aria-selected', active ? 'true' : 'false');
+        });
+
+        gate.querySelectorAll('[data-stage]').forEach((stage) => {
+          const active = stage.getAttribute('data-stage') === slug;
+          stage.classList.toggle('is-active', active);
+          stage.setAttribute('aria-hidden', active ? 'false' : 'true');
+        });
+
+        gate.querySelectorAll('[data-cta]').forEach((cta) => {
+          const active = cta.getAttribute('data-cta') === slug;
+          cta.classList.toggle('is-active', active);
+          if (cta instanceof HTMLElement) cta.tabIndex = active ? 0 : -1;
+        });
+      };
+
+      const onClick = (event: Event) => {
+        const target = event.target;
+        if (!(target instanceof Element)) return;
+        const link = target.closest('.home-split-link');
+        if (!link || !gate.contains(link)) return;
+        event.preventDefault();
+        activate(link.getAttribute('data-slug'));
+      };
+
+      gate.addEventListener('click', onClick);
+      cleanups.push(() => gate.removeEventListener('click', onClick));
+    }
+
+    // Mobile carousel
+    const mobile = document.querySelector('.home-split-mobile');
+    const carousel = document.getElementById('home-split-carousel');
+    const indexLabel = document.getElementById('home-split-mobile-index');
+    const slides = carousel ? Array.from(carousel.querySelectorAll<HTMLElement>('.home-split-slide')) : [];
+    const dots = mobile ? Array.from(mobile.querySelectorAll<HTMLButtonElement>('.home-split-dot')) : [];
+
+    if (mobile && carousel && slides.length > 0) {
+      let activeIndex = 0;
+
+      const setActive = (index: number) => {
+        activeIndex = Math.max(0, Math.min(index, slides.length - 1));
+        const slug = slides[activeIndex]?.getAttribute('data-slug');
+        if (slug) mobile.setAttribute('data-active-slug', slug);
+
+        slides.forEach((slide, i) => slide.classList.toggle('is-active', i === activeIndex));
+        dots.forEach((dot, i) => {
+          const active = i === activeIndex;
+          dot.classList.toggle('is-active', active);
+          dot.setAttribute('aria-current', active ? 'true' : 'false');
+        });
+        if (indexLabel) indexLabel.textContent = String(activeIndex + 1).padStart(2, '0');
+      };
+
+      const syncFromScroll = () => {
+        const center = carousel.scrollLeft + carousel.clientWidth / 2;
+        let closest = 0;
+        let closestDist = Infinity;
+        slides.forEach((slide, i) => {
+          const slideCenter = slide.offsetLeft + slide.offsetWidth / 2;
+          const dist = Math.abs(slideCenter - center);
+          if (dist < closestDist) {
+            closestDist = dist;
+            closest = i;
+          }
+        });
+        if (closest !== activeIndex) setActive(closest);
+      };
+
+      let scrollRaf = 0;
+      const onScroll = () => {
+        cancelAnimationFrame(scrollRaf);
+        scrollRaf = requestAnimationFrame(syncFromScroll);
+      };
+
+      const onDotClick = (event: Event) => {
+        const target = event.target;
+        if (!(target instanceof Element)) return;
+        const dot = target.closest('.home-split-dot');
+        if (!(dot instanceof HTMLElement)) return;
+        const index = Number(dot.dataset.index ?? 0);
+        const slide = slides[index];
+        if (!slide) return;
+        slide.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+        setActive(index);
+      };
+
+      carousel.addEventListener('scroll', onScroll, { passive: true });
+      mobile.addEventListener('click', onDotClick);
+      setActive(0);
+
+      cleanups.push(() => {
+        cancelAnimationFrame(scrollRaf);
+        carousel.removeEventListener('scroll', onScroll);
+        mobile.removeEventListener('click', onDotClick);
+      });
+    }
+
+    window.__homeSplitCleanup = () => {
+      cleanups.forEach((fn) => fn());
+    };
+  }
+
+  if (!window.__homeSplitPageLoadBound) {
+    document.addEventListener('astro:page-load', initHomeSplitGate);
+    window.__homeSplitPageLoadBound = true;
+  }
+
+  initHomeSplitGate();
+</script>
+
+<style>
+  .home-split-mobile,
+  .home-split-gate {
+    animation: home-split-gate-in 800ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  @keyframes home-split-gate-in {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .home-split-carousel {
+    padding-inline: 1rem;
+    scroll-padding-inline: 1rem;
+  }
+
+  .home-split-slide {
+    transition:
+      border-color 350ms ease,
+      transform 350ms ease,
+      opacity 350ms ease;
+    opacity: 0.55;
+    transform: scale(0.96);
+  }
+
+  .home-split-slide.is-active {
+    opacity: 1;
+    transform: scale(1);
+    border-color: rgba(197, 160, 89, 0.45);
+    box-shadow: 0 0 0 1px rgba(197, 160, 89, 0.2);
+  }
+
+  .home-split-swipe-hint {
+    animation: home-split-swipe-pulse 2.2s ease-in-out infinite;
+  }
+
+  .home-split-swipe-icon {
+    opacity: 0.7;
+  }
+
+  @keyframes home-split-swipe-pulse {
+    0%,
+    100% {
+      opacity: 0.55;
+      transform: translateX(0);
+    }
+    50% {
+      opacity: 1;
+      transform: translateX(2px);
+    }
+  }
+
+  .home-split-dot {
+    width: 0.4rem;
+    height: 0.4rem;
+    border-radius: 9999px;
+    border: 0;
+    padding: 0;
+    background: rgba(255, 255, 255, 0.2);
+    transition:
+      width 300ms ease,
+      background-color 300ms ease;
+  }
+
+  .home-split-dot.is-active {
+    width: 1.35rem;
+    background: var(--color-brand-gold);
+  }
+
+  .home-split-gate {
+    align-items: stretch;
+  }
+
+  .home-split-stage {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 450ms ease;
+    pointer-events: none;
+  }
+
+  .home-split-stage.is-active {
+    opacity: 1;
+  }
+
+  .home-split-stage-image {
+    transition: transform 1100ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .home-split-stage.is-active .home-split-stage-image {
+    transform: scale(1.03);
+  }
+
+  .home-split-cta {
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    display: block;
+    padding: 2.25rem 2.5rem 2.5rem;
+    opacity: 0;
+    transform: translateY(10px);
+    transition:
+      opacity 350ms ease,
+      transform 350ms ease;
+    pointer-events: none;
+  }
+
+  .home-split-cta.is-active {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  .home-split-cta:hover .font-display {
+    color: var(--color-brand-gold);
+  }
+
+  .home-split-link {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: 0.85rem;
+    align-items: center;
+    flex: 1 1 0;
+    width: 100%;
+    min-height: 0;
+    padding: 0.95rem 1.15rem 0.95rem 1.25rem;
+    text-align: left;
+    cursor: pointer;
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: background-color 300ms ease;
+  }
+
+  .home-split-link:last-child {
+    border-bottom: 0;
+  }
+
+  .home-split-link:hover,
+  .home-split-link.is-active {
+    background: linear-gradient(90deg, rgba(197, 160, 89, 0.12), transparent 80%);
+  }
+
+  .home-split-indicator {
+    position: absolute;
+    top: 0.55rem;
+    bottom: 0.55rem;
+    left: 0;
+    width: 2px;
+    background: var(--color-brand-gold);
+    transform: scaleY(0);
+    transform-origin: center;
+    transition: transform 350ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .home-split-link:hover .home-split-indicator,
+  .home-split-link.is-active .home-split-indicator {
+    transform: scaleY(1);
+  }
+
+  .home-split-index {
+    font-family: ui-monospace, monospace;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.3em;
+    color: rgb(75 85 99);
+    transition: color 300ms ease;
+  }
+
+  .home-split-link:hover .home-split-index,
+  .home-split-link.is-active .home-split-index {
+    color: var(--color-brand-gold);
+  }
+
+  .home-split-label {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .home-split-name {
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    font-weight: 900;
+    font-style: italic;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+    color: rgb(209 213 219);
+    line-height: 1.15;
+    transition:
+      color 300ms ease,
+      transform 300ms ease;
+  }
+
+  .home-split-link:hover .home-split-name,
+  .home-split-link.is-active .home-split-name {
+    color: white;
+    transform: translateX(3px);
+  }
+
+  .home-split-meta {
+    font-size: 0.7rem;
+    line-height: 1.4;
+    color: rgb(156 163 175);
+  }
+
+  .home-split-link:hover .home-split-meta,
+  .home-split-link.is-active .home-split-meta {
+    color: rgb(209 213 219);
+  }
+</style>
