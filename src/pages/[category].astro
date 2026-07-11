@@ -6,6 +6,7 @@ import Photo from '../components/Photo.astro';
 import { client } from '../lib/sanity';
 import { CATEGORY_PHOTOS_QUERY } from '../utils/queries';
 import categoryData from '../data/category.json';
+import { homeCategories, type HomeCategorySlug } from '../data/homeCategories';
 import type { SanityImageSource } from '../utils/imageUrl';
 
 type GalleryPhoto = {
@@ -15,18 +16,13 @@ type GalleryPhoto = {
   category?: string;
 };
 
-const categories = ['automotive', 'sports', 'portraits', 'nature'] as const;
-type CategorySlug = (typeof categories)[number];
+const categories = homeCategories.map((cat) => cat.slug);
+type CategorySlug = HomeCategorySlug;
 
 export const prerender = true;
 
 export async function getStaticPaths() {
-  return [
-    { params: { category: 'automotive' } },
-    { params: { category: 'sports' } },
-    { params: { category: 'portraits' } },
-    { params: { category: 'nature' } },
-  ];
+  return homeCategories.map((cat) => ({ params: { category: cat.slug } }));
 }
 
 const { category } = Astro.params;

@@ -2,6 +2,8 @@ import portraits from './portraits'
 import nature from './nature'
 import automotive from './automotive'
 import sports from './sports'
+import graduation from './graduation'
+import cityscape from './cityscape'
 import misc from './misc'
 
 export const schemaTypes = [
@@ -10,6 +12,8 @@ export const schemaTypes = [
   nature,
   automotive,
   sports,
+  graduation,
+  cityscape,
   // Miscellaneous schemas
   misc,
 ]

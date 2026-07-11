@@ -30,6 +30,8 @@ export const createPhotoSchema = (category: string, displayName: string) => ({
           { title: 'Nature', value: 'nature' },
           { title: 'Automotive', value: 'automotive' },
           { title: 'Sports', value: 'sports' },
+          { title: 'Graduation', value: 'graduation' },
+          { title: 'Cityscape', value: 'cityscape' },
         ],
         layout: 'radio'
       }
@@ -38,6 +40,7 @@ export const createPhotoSchema = (category: string, displayName: string) => ({
       name: 'featured',
       type: 'boolean',
       title: 'Featured on Homepage?',
+      description: 'When enabled, this photo is preferred as the homepage image for its category. Gallery order still uses Display Order.',
       initialValue: false
     },
     {

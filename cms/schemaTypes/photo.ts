@@ -34,7 +34,8 @@ export default {
           { title: 'Nature', value: 'nature' },
           { title: 'Automotive', value: 'automotive' },
           { title: 'Sports', value: 'sports' },
-
+          { title: 'Graduation', value: 'graduation' },
+          { title: 'Cityscape', value: 'cityscape' },
         ],
         layout: 'radio' // Display options as radio buttons
       }

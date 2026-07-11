@@ -1,0 +1,361 @@
+---
+// src/components/HomeSplit.astro
+// Split-screen category gate — index rail + live preview stage
+
+import { homeCategories, type HomeCategorySlug } from '../data/homeCategories';
+import { getResponsiveImage } from '../utils/imageUrl';
+import type { SanityImageSource } from '../utils/imageUrl';
+
+type GalleryPhoto = {
+  image: SanityImageSource;
+  title: string;
+  alt?: string;
+  category?: string;
+};
+
+interface Props {
+  photosByCategory: Record<HomeCategorySlug, GalleryPhoto[]>;
+}
+
+const { photosByCategory } = Astro.props;
+
+const panels = homeCategories.map((cat) => {
+  const leadPhoto = (photosByCategory[cat.slug] ?? [])[0] ?? null;
+  const image = leadPhoto
+    ? getResponsiveImage(leadPhoto.image, {
+        widths: [720, 960, 1200, 1600, 2000],
+        sizes: '(max-width: 1024px) 100vw, 62vw',
+        fit: 'max',
+      })
+    : null;
+
+  return { ...cat, leadPhoto, image };
+});
+
+const defaultSlug = panels[0]?.slug ?? 'automotive';
+---
+
+<section class="w-full pb-14 lg:pb-16">
+  <div class="home-split-gate grid overflow-hidden rounded-sm border border-white/5 bg-card-dark lg:grid-cols-[minmax(220px,32%)_1fr]" data-active-slug={defaultSlug}>
+    {/* Index rail */}
+    <nav class="relative z-20 flex h-full flex-col border-b border-white/5 bg-obsidian lg:border-b-0 lg:border-r lg:border-white/5" aria-label="Photography collections">
+      <div class="flex min-h-0 flex-1 flex-col" role="listbox" aria-label="Category previews">
+        {panels.map((panel, index) => (
+          <button
+            type="button"
+            class:list={['home-split-link', index === 0 && 'is-active']}
+            data-slug={panel.slug}
+            role="option"
+            aria-selected={index === 0 ? 'true' : 'false'}
+          >
+            <span class="home-split-indicator" aria-hidden="true"></span>
+            <span class="home-split-index">{String(index + 1).padStart(2, '0')}</span>
+            <span class="home-split-label">
+              <span class="home-split-name">{panel.name}</span>
+              <span class="home-split-meta">{panel.tagline}</span>
+            </span>
+          </button>
+        ))}
+      </div>
+    </nav>
+
+    {/* Preview stage */}
+    <div class="relative z-10 min-h-[34rem] sm:min-h-[40rem] lg:min-h-[min(78vh,820px)]">
+      {panels.map((panel, index) => (
+        <div
+          class:list={['home-split-stage', index === 0 && 'is-active']}
+          data-stage={panel.slug}
+          data-orientation={panel.orientation}
+          aria-hidden={index === 0 ? 'false' : 'true'}
+        >
+          {panel.image && panel.leadPhoto ? (
+            <picture class="absolute inset-0 block h-full w-full">
+              <source type="image/avif" srcset={panel.image.avifSrcSet} sizes={panel.image.sizes} />
+              <source type="image/webp" srcset={panel.image.webpSrcSet} sizes={panel.image.sizes} />
+              <img
+                src={panel.image.src}
+                alt={panel.leadPhoto.alt ?? panel.leadPhoto.title}
+                loading={index === 0 ? 'eager' : 'lazy'}
+                fetchpriority={index === 0 ? 'high' : 'auto'}
+                sizes={panel.image.sizes}
+                draggable="false"
+                class:list={[
+                  'home-split-stage-image h-full w-full object-cover',
+                  panel.orientation === 'portrait' ? 'object-[center_18%]' : 'object-center',
+                ]}
+              />
+            </picture>
+          ) : (
+            <div class="absolute inset-0 bg-linear-to-br from-white/[0.04] via-brand-gold/[0.07] to-black"></div>
+          )}
+
+          <div class="absolute inset-0 bg-linear-to-t from-obsidian via-obsidian/35 to-transparent"></div>
+        </div>
+      ))}
+
+      <div class="pointer-events-none absolute inset-x-0 bottom-0 z-20">
+        {panels.map((panel, index) => (
+          <a
+            href={`/${panel.slug}`}
+            class:list={['home-split-cta', index === 0 && 'is-active']}
+            data-cta={panel.slug}
+            tabindex={index === 0 ? 0 : -1}
+          >
+            <p class="mb-2 text-[10px] font-bold uppercase tracking-[0.35em] text-brand-gold">View collection</p>
+            <p class="font-display text-3xl font-black uppercase italic tracking-tight text-white sm:text-4xl lg:text-5xl">{panel.name}</p>
+            <p class="mt-3 max-w-lg text-sm leading-relaxed text-gray-300 sm:text-base">{panel.copy}</p>
+          </a>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  declare global {
+    interface Window {
+      __homeSplitCleanup?: () => void;
+      __homeSplitPageLoadBound?: boolean;
+    }
+  }
+
+  function initHomeSplitGate() {
+    window.__homeSplitCleanup?.();
+
+    const gate = document.querySelector('.home-split-gate');
+    if (!gate) {
+      window.__homeSplitCleanup = undefined;
+      return;
+    }
+
+    const activate = (slug: string | null) => {
+      if (!slug) return;
+      gate.setAttribute('data-active-slug', slug);
+
+      gate.querySelectorAll('.home-split-link').forEach((link) => {
+        const active = link.getAttribute('data-slug') === slug;
+        link.classList.toggle('is-active', active);
+        link.setAttribute('aria-selected', active ? 'true' : 'false');
+      });
+
+      gate.querySelectorAll('[data-stage]').forEach((stage) => {
+        const active = stage.getAttribute('data-stage') === slug;
+        stage.classList.toggle('is-active', active);
+        stage.setAttribute('aria-hidden', active ? 'false' : 'true');
+      });
+
+      gate.querySelectorAll('[data-cta]').forEach((cta) => {
+        const active = cta.getAttribute('data-cta') === slug;
+        cta.classList.toggle('is-active', active);
+        if (cta instanceof HTMLElement) cta.tabIndex = active ? 0 : -1;
+      });
+    };
+
+    const onClick = (event: Event) => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      const link = target.closest('.home-split-link');
+      if (!link || !gate.contains(link)) return;
+      event.preventDefault();
+      activate(link.getAttribute('data-slug'));
+    };
+
+    gate.addEventListener('click', onClick);
+    window.__homeSplitCleanup = () => {
+      gate.removeEventListener('click', onClick);
+    };
+  }
+
+  if (!window.__homeSplitPageLoadBound) {
+    document.addEventListener('astro:page-load', initHomeSplitGate);
+    window.__homeSplitPageLoadBound = true;
+  }
+
+  initHomeSplitGate();
+</script>
+
+<style>
+  .home-split-gate {
+    animation: home-split-gate-in 800ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    align-items: stretch;
+  }
+
+  @keyframes home-split-gate-in {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .home-split-stage {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 450ms ease;
+    pointer-events: none;
+  }
+
+  .home-split-stage.is-active {
+    opacity: 1;
+  }
+
+  .home-split-stage-image {
+    transition: transform 1100ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .home-split-stage.is-active .home-split-stage-image {
+    transform: scale(1.03);
+  }
+
+  .home-split-cta {
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    display: block;
+    padding: 1.5rem 1.5rem 1.75rem;
+    opacity: 0;
+    transform: translateY(10px);
+    transition:
+      opacity 350ms ease,
+      transform 350ms ease;
+    pointer-events: none;
+  }
+
+  @media (min-width: 640px) {
+    .home-split-cta {
+      padding: 2rem 2rem 2.25rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .home-split-cta {
+      padding: 2.25rem 2.5rem 2.5rem;
+    }
+  }
+
+  .home-split-cta.is-active {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  .home-split-cta:hover .font-display {
+    color: var(--color-brand-gold);
+  }
+
+  .home-split-link {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: 0.75rem;
+    align-items: center;
+    flex: 1 1 0;
+    width: 100%;
+    min-height: 0;
+    padding: 0.85rem 1rem 0.85rem 1.15rem;
+    text-align: left;
+    cursor: pointer;
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: background-color 300ms ease;
+  }
+
+  .home-split-link:last-child {
+    border-bottom: 0;
+  }
+
+  @media (min-width: 640px) {
+    .home-split-link {
+      padding: 0.95rem 1.15rem 0.95rem 1.25rem;
+      column-gap: 0.85rem;
+    }
+  }
+
+  .home-split-link:hover,
+  .home-split-link.is-active {
+    background: linear-gradient(90deg, rgba(197, 160, 89, 0.12), transparent 80%);
+  }
+
+  .home-split-indicator {
+    position: absolute;
+    top: 0.55rem;
+    bottom: 0.55rem;
+    left: 0;
+    width: 2px;
+    background: var(--color-brand-gold);
+    transform: scaleY(0);
+    transform-origin: center;
+    transition: transform 350ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .home-split-link:hover .home-split-indicator,
+  .home-split-link.is-active .home-split-indicator {
+    transform: scaleY(1);
+  }
+
+  .home-split-index {
+    font-family: ui-monospace, monospace;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.3em;
+    color: rgb(75 85 99);
+    transition: color 300ms ease;
+  }
+
+  .home-split-link:hover .home-split-index,
+  .home-split-link.is-active .home-split-index {
+    color: var(--color-brand-gold);
+  }
+
+  .home-split-label {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 0.3rem;
+    overflow: visible;
+  }
+
+  .home-split-name {
+    font-family: var(--font-display);
+    font-size: 0.95rem;
+    font-weight: 900;
+    font-style: italic;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+    color: rgb(209 213 219);
+    line-height: 1.15;
+    transition:
+      color 300ms ease,
+      transform 300ms ease;
+  }
+
+  @media (min-width: 640px) {
+    .home-split-name {
+      font-size: 1.05rem;
+    }
+  }
+
+  .home-split-link:hover .home-split-name,
+  .home-split-link.is-active .home-split-name {
+    color: white;
+    transform: translateX(3px);
+  }
+
+  .home-split-meta {
+    font-size: 0.7rem;
+    line-height: 1.4;
+    color: rgb(156 163 175);
+    white-space: normal;
+    overflow: visible;
+  }
+
+  .home-split-link:hover .home-split-meta,
+  .home-split-link.is-active .home-split-meta {
+    color: rgb(209 213 219);
+  }
+</style>
