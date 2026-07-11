@@ -22,7 +22,7 @@ type GalleryPhoto = {
 type HomepagePhotos = Record<HomeCategorySlug, GalleryPhoto[]>;
 
 /** Switch homepage layout while experimenting: 'bands' | 'split' | 'matrix' */
-const homeLayout = 'bands' as 'bands' | 'split' | 'matrix';
+const homeLayout = 'split' as 'bands' | 'split' | 'matrix';
 
 const photosByCategory = await client.fetch<HomepagePhotos>(HOMEPAGE_PHOTOS_QUERY);
 ---
