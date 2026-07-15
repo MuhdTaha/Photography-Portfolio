@@ -19,12 +19,6 @@ type GalleryPhoto = {
 const categories = homeCategories.map((cat) => cat.slug);
 type CategorySlug = HomeCategorySlug;
 
-export const prerender = true;
-
-export async function getStaticPaths() {
-  return homeCategories.map((cat) => ({ params: { category: cat.slug } }));
-}
-
 const { category } = Astro.params;
 const normalizedCategory = category?.toLowerCase() ?? '';
 const isValidCategory = categories.includes(normalizedCategory as CategorySlug);
